@@ -28,6 +28,25 @@ namespace SfmlTetris
                         case SDL.SDL_EventType.SDL_QUIT:
                             quit = true;
                             break;
+                        case SDL.SDL_EventType.SDL_KEYDOWN:
+                            if (e.key.repeat==0){
+                                switch (e.key.keysym.sym){
+                                    case SDL.SDL_Keycode.SDLK_ESCAPE:
+                                        quit = true;
+                                        break;
+                                    case SDL.SDL_Keycode.SDLK_LEFT:
+                                    
+                                        break;
+                                    case SDL.SDL_Keycode.SDLK_RIGHT:
+                                    
+                                        break;
+                                    case SDL.SDL_Keycode.SDLK_UP:
+
+                                        break;
+
+                                }
+                            }
+                            break;
 
                     }
                 }
