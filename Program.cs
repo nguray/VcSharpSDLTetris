@@ -5,6 +5,27 @@ using SDL2;
 namespace SDLTetris
 {
 
+
+    static class Globals{
+
+        public const int WIN_WIDTH = 480;
+        public const int WIN_HEIGHT = 560;
+  
+        public const int NB_ROWS = 20;
+        public const int NB_COLUMNS = 12;
+
+        public const int LEFT = 10;
+        public const int TOP = 10;
+
+        public static int cellSize = Globals.WIN_WIDTH / (Globals.NB_COLUMNS + 7);
+
+        public static Tetromino? curTetromino;
+        public static Tetromino? nextTetromino;
+
+
+    }
+
+
     class Vector2i{
         public int x;
         public int y;
@@ -15,10 +36,10 @@ namespace SDLTetris
     }
 
     class Color{
-        public int red;
-        public int green;
-        public int blue;
-        public Color(int r,int g,int b){
+        public byte red;
+        public byte green;
+        public byte blue;
+        public Color(byte r,byte g,byte b){
             red = r;
             green = g;
             blue = b;
@@ -27,32 +48,31 @@ namespace SDLTetris
 
     class Program
     {
-        const int WIDTH = 480;
-        const int HEIGHT = 640;
-        const string TITLE = "C# SDL2 Tetris";
-
-        const int NB_ROWS = 20;
-        const int NB_COLUMNS = 16;
 
 
-        Tetromino? curTetromino;
-        Tetromino? nextTetromino;
+       const string TITLE = "C# SDL2 Tetris";
+
 
         static void Main(string[] args)
         {
 
 			SDL.SDL_Init(SDL.SDL_INIT_VIDEO);
 
+
             var window = IntPtr.Zero;
+            
 
             window = SDL.SDL_CreateWindow(TITLE,SDL.SDL_WINDOWPOS_CENTERED,
-                        SDL.SDL_WINDOWPOS_CENTERED,WIDTH,HEIGHT,SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN);
+                        SDL.SDL_WINDOWPOS_CENTERED,Globals.WIN_WIDTH,Globals.WIN_HEIGHT,SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN);
 
 
             var renderer = SDL.SDL_CreateRenderer(window,-1,
                 SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED|SDL.SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC);
 			
+            Globals.curTetromino = new Tetromino(1,6*Globals.cellSize+Globals.LEFT,7*Globals.cellSize+Globals.TOP);
+
             SDL.SDL_Event e;
+            SDL.SDL_Rect rect;
 
             bool quit = false;
             while(!quit)
@@ -60,6 +80,15 @@ namespace SDLTetris
 
                 SDL.SDL_SetRenderDrawColor(renderer,48,48,255,255);
                 SDL.SDL_RenderClear(renderer);
+
+                rect.x = Globals.LEFT;
+                rect.y = Globals.TOP;
+                rect.w = Globals.cellSize*Globals.NB_COLUMNS;
+                rect.h = Globals.cellSize*Globals.NB_ROWS;
+                SDL.SDL_SetRenderDrawColor(renderer,10,10,100,255);
+                SDL.SDL_RenderFillRect(renderer,ref rect);
+
+
 
                 while (SDL.SDL_PollEvent(out e)!=0)
                 {
@@ -90,6 +119,9 @@ namespace SDLTetris
 
                     }
                 }
+                
+                //--
+                Globals.curTetromino.Draw(renderer);
 
                 //--
                 SDL.SDL_RenderPresent(renderer);
