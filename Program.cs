@@ -22,6 +22,7 @@ namespace SDLTetris
         public static Tetromino? curTetromino;
         public static Tetromino? nextTetromino;
 
+        public static Random rand;
 
     }
 
@@ -69,7 +70,15 @@ namespace SDLTetris
             var renderer = SDL.SDL_CreateRenderer(window,-1,
                 SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED|SDL.SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC);
 			
-            Globals.curTetromino = new Tetromino(1,6*Globals.cellSize+Globals.LEFT,7*Globals.cellSize+Globals.TOP);
+
+            DateTime randSeed = DateTime.Now;
+            Globals.rand = new Random(randSeed.Millisecond);
+
+            Globals.curTetromino = new Tetromino(Globals.rand.Next(1,8),6*Globals.cellSize+Globals.LEFT,3*Globals.cellSize+Globals.TOP);
+
+
+            UInt64 startTime = SDL.SDL_GetTicks64();
+            UInt64 curTime = 0;
 
             SDL.SDL_Event e;
             SDL.SDL_Rect rect;
@@ -119,10 +128,27 @@ namespace SDLTetris
 
                     }
                 }
-                
-                //--
-                Globals.curTetromino.Draw(renderer);
 
+                curTime = SDL.SDL_GetTicks64();
+                if ((curTime-startTime)>30){
+                    startTime = curTime;
+                    if (Globals.curTetromino!=null){
+                        Globals.curTetromino.y += 5; 
+                    }
+
+                }
+
+
+
+                //--
+                if (Globals.curTetromino!=null){
+                    Globals.curTetromino.Draw(renderer);
+                }
+                
+                if (Globals.nextTetromino!=null){
+                    Globals.nextTetromino.Draw(renderer);
+                }
+                
                 //--
                 SDL.SDL_RenderPresent(renderer);
 
