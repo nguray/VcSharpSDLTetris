@@ -5,7 +5,6 @@ using SDL2;
 namespace SDLTetris
 {
 
-
     static class Globals{
 
         public const int WIN_WIDTH = 480;
@@ -62,6 +61,8 @@ namespace SDLTetris
         static int curScore = 0;
         public static Tetromino? curTetromino;
         public static Tetromino? nextTetromino;
+
+        public static int[] board = new int[Globals.NB_COLUMNS*Globals.NB_ROWS];
 
         public delegate bool ProcessEvent(ref SDL.SDL_Event e);
         static ProcessEvent? processEvent;
@@ -172,11 +173,13 @@ namespace SDLTetris
         }
 
         static void DrawStandBy(IntPtr renderer,IntPtr tt_font){
-            SDL.SDL_Color fg;
-            fg.r = 255;
-            fg.g = 255;
-            fg.b = 0;
-            fg.a = 255;
+
+            var fg = new SDL.SDL_Color {
+                r = 255,
+                g = 255,
+                b = 0,
+                a = 255
+            };
 
             var yLine = Globals.TOP + (Globals.NB_ROWS/4)*Globals.cellSize;
             var txtScore = "Tetris powered by SDL2";
@@ -188,11 +191,12 @@ namespace SDLTetris
                     uint format;
                     int access,w,h;
                     SDL.SDL_QueryTexture(textureSCore,out format,out access,out w,out h);
-                    SDL.SDL_Rect desRect;
-                    desRect.x = Globals.LEFT + (Globals.NB_COLUMNS/2)*Globals.cellSize - w/2;
-                    desRect.y = yLine;
-                    desRect.w = w;
-                    desRect.h = h;
+                    var desRect = new SDL.SDL_Rect {
+                        x = Globals.LEFT + (Globals.NB_COLUMNS/2)*Globals.cellSize - w/2, 
+                        y = yLine,
+                        w = w,
+                        h = h
+                    };
                     SDL.SDL_RenderCopy(renderer,textureSCore, IntPtr.Zero ,ref desRect);
                     SDL.SDL_DestroyTexture(textureSCore);
                     yLine += 2*h + 4;
@@ -233,8 +237,11 @@ namespace SDLTetris
 
             curScore = 0;
 
-            curTetromino = null;
+            for(int i=0;i<board.Length;i++){
+                board[i] = 0;
+            }
 
+            curTetromino = null;
             nextTetromino = new Tetromino(Globals.rand.Next(1,8),(Globals.NB_COLUMNS+3)*Globals.cellSize,10*Globals.cellSize);
 
         }
@@ -246,6 +253,27 @@ namespace SDLTetris
             curTetromino.y = 0;
             curTetromino.y = -curTetromino.MaxY1() * Globals.cellSize;
             nextTetromino = new Tetromino(Globals.rand.Next(1,8),(Globals.NB_COLUMNS+3)*Globals.cellSize,10*Globals.cellSize);
+
+        }
+
+        static void DrawBoard(IntPtr renderer){
+
+            SDL.SDL_Rect rect;
+            var a = Globals.cellSize - 2;
+            rect.w = a;
+            rect.h = a;
+             for(int l=0;l<Globals.NB_ROWS;l++){
+                for(int c=0;c<Globals.NB_COLUMNS;c++){
+                    var typ = board[l*Globals.NB_COLUMNS+c];
+                    if (typ!=0){
+                        var color = Tetromino.Colors[typ];
+                        SDL.SDL_SetRenderDrawColor(renderer, color.red, color.green, color.blue, 255);
+                        rect.x = c*Globals.cellSize + Globals.LEFT + 1;
+                        rect.y = l*Globals.cellSize + Globals.TOP + 1;
+                        SDL.SDL_RenderFillRect(renderer,ref rect);
+                    }
+                }
+            }
 
         }
 
@@ -277,6 +305,10 @@ namespace SDLTetris
 
             InitGame();
 
+            // for(int i = 0;i<10;i++){
+            //     board[Globals.NB_COLUMNS + i] = 2;
+            // }
+
             gameMode = GameMode.STANDBY;
             processEvent = processStandByEvent;
 
@@ -302,6 +334,8 @@ namespace SDLTetris
                 SDL.SDL_SetRenderDrawColor(renderer,10,10,100,255);
                 SDL.SDL_RenderFillRect(renderer,ref rect);
 
+                //--
+                DrawBoard(renderer);
 
 
                 while (SDL.SDL_PollEvent(out e)!=0)
@@ -333,6 +367,7 @@ namespace SDLTetris
 
                     }
 
+ 
                     //--
                     if (curTetromino!=null){
                         curTetromino.Draw(renderer);
@@ -344,12 +379,13 @@ namespace SDLTetris
 
                 }
 
-
                 
                 if (nextTetromino!=null){
                     nextTetromino.Draw(renderer);
                 }
                 
+
+                //--
                 DrawScore(renderer,tt_font);
 
                 //--
