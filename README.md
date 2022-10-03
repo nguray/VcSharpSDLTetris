@@ -1,2 +1,2 @@
 # VcSharpSDLTetris
-Tetris for C# Using SDL2 
+Tetris in C# Using SDL2 
