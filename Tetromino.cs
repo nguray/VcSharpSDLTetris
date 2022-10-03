@@ -63,6 +63,46 @@ namespace SDLTetris
             }
         }
 
+        public void RotateRight()
+        {
+            int     x,y;
+            //-------------------------------------------
+            for (int i=0;i<vectors.Count;i++){
+                var v = vectors[i];
+                x = -v.y;
+                y = v.x;
+                v.x = x;
+                v.y = y;
+            }
+
+        }
+
+        public void RotateLeft()
+        {
+            int     x,y;
+            //-------------------------------------------
+            for (int i=0;i<vectors.Count;i++){
+                var v = vectors[i];
+                x = v.y;
+                y = -v.x;
+                v.x = x;
+                v.y = y;
+           }
+            
+        }
+
+        public int MaxY1() {
+            int y; 
+            var maxY = vectors[0].y;
+            for (int i=1;i<vectors.Count;i++){
+                y = vectors[i].y;
+                if (y > maxY) {
+                    maxY = y;
+                }
+            }
+            return maxY;
+        }
+
     }
 
 }
