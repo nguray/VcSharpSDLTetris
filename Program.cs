@@ -62,10 +62,19 @@ namespace SDLTetris
         public static Tetromino? curTetromino;
         public static Tetromino? nextTetromino;
 
+        public static bool fFastDown = false;
+        public static bool fDrop = false;
+
         public static int[] board = new int[Globals.NB_COLUMNS*Globals.NB_ROWS];
+
+        public static Int32 horizontalMove = 0;
+        public static Int32 horizontalStartColumn = 0;
 
         public delegate bool ProcessEvent(ref SDL.SDL_Event e);
         static ProcessEvent? processEvent;
+
+        static public Int32 idTetrominoBag = 14;
+        static public Int32[] tetrominoBag = {1,2,3,4,5,6,7,1,2,3,4,5,6,7};  
 
         //---------------------------------------------------------------------
         //-- Play Mode
@@ -94,7 +103,12 @@ namespace SDLTetris
                                     curTetromino.RotateLeft();
                                 }
                                 break;
-
+                            case SDL.SDL_Keycode.SDLK_DOWN:
+                                fFastDown = true;
+                                break;
+                            case SDL.SDL_Keycode.SDLK_SPACE:
+                                fDrop = true;
+                                break;
                         }
                     }
                     break;
@@ -106,7 +120,10 @@ namespace SDLTetris
                         case SDL.SDL_Keycode.SDLK_RIGHT:
                             VelH = 0;                            
                             break;
-                    }
+                        case SDL.SDL_Keycode.SDLK_DOWN:
+                            fFastDown = false;
+                            break;
+                     }
                     break;
             }
             return quit;
@@ -242,7 +259,7 @@ namespace SDLTetris
             }
 
             curTetromino = null;
-            nextTetromino = new Tetromino(Globals.rand.Next(1,8),(Globals.NB_COLUMNS+3)*Globals.cellSize,10*Globals.cellSize);
+            nextTetromino = new Tetromino(TetrisRandomizer(),(Globals.NB_COLUMNS+3)*Globals.cellSize,10*Globals.cellSize);
 
         }
 
@@ -252,7 +269,7 @@ namespace SDLTetris
             curTetromino.x = 6 * Globals.cellSize;
             curTetromino.y = 0;
             curTetromino.y = -curTetromino.MaxY1() * Globals.cellSize;
-            nextTetromino = new Tetromino(Globals.rand.Next(1,8),(Globals.NB_COLUMNS+3)*Globals.cellSize,10*Globals.cellSize);
+            nextTetromino = new Tetromino(TetrisRandomizer(),(Globals.NB_COLUMNS+3)*Globals.cellSize,10*Globals.cellSize);
 
         }
 
@@ -275,6 +292,93 @@ namespace SDLTetris
                 }
             }
 
+        }
+
+        static Int32 ComputeScore(Int32 nbLines){
+            switch(nbLines){
+                case 0 :
+                    return 0;
+                case 1 :
+                    return 40;
+                case 2 :
+                    return 100;
+                case 3 :
+                    return 300;
+                case 4 :
+                    return 1200;
+                default:
+                    return 2000; 
+            }
+        }
+
+        static Int32 EraseCompletedLines(){
+            //---------------------------------------------------
+            Int32 nbLines = 0;
+            bool fCompleted = false;
+            for(int r=0;r<Globals.NB_ROWS;r++){
+                fCompleted = true;
+                for(int c=0;c<Globals.NB_COLUMNS;c++){
+                    if (board[r*Globals.NB_COLUMNS+c]==0){
+                        fCompleted = false;
+                        break;
+                    }
+                }
+                if (fCompleted){
+                    nbLines++;
+                    //-- Décaler d'une ligne le plateau
+                    for(int r1=r;r1>0;r1--){
+                        for(int c1=0;c1<Globals.NB_COLUMNS;c1++){
+                            board[r1*Globals.NB_COLUMNS+c1] = board[(r1-1)*Globals.NB_COLUMNS+c1];
+                        }
+                    }
+
+                }
+            }
+
+            return nbLines;
+        } 
+
+        static void FreezeCurTetromino(){
+            //----------------------------------------------------
+            if (curTetromino!=null){
+                var ix = (curTetromino.x + 1) / Globals.cellSize;
+                var iy = (curTetromino.y + 1) / Globals.cellSize;
+                foreach(var v in curTetromino.vectors){
+                    var x = v.x + ix;
+                    var y = v.y + iy;
+                    if ((x>=0) && (x<Globals.NB_COLUMNS) && (y>=0) && (y<Globals.NB_ROWS)){
+                        board[y*Globals.NB_COLUMNS+x] = curTetromino.type;
+                    }
+                }
+                //--
+                var nbLines = EraseCompletedLines();
+                if (nbLines>0){
+                    curScore += ComputeScore(nbLines);
+
+                } 
+            }
+
+        }
+
+        static Int32 TetrisRandomizer(){
+            Int32 iSrc;
+            Int32 iTyp=0;
+            if (idTetrominoBag<14){
+                iTyp = tetrominoBag[idTetrominoBag];
+                idTetrominoBag++;
+            }else{
+                //-- Shuttle bag
+                for(int i=0;i<tetrominoBag.Length;i++){
+                    iSrc = Globals.rand.Next(0,14);
+                    iTyp = tetrominoBag[iSrc];
+                    tetrominoBag[iSrc] = tetrominoBag[0];
+                    tetrominoBag[0] = iTyp;
+                }
+                iTyp =tetrominoBag[0];
+                idTetrominoBag = 1;
+
+            }
+            return iTyp;
         }
 
         static void Main(string[] args)
@@ -312,8 +416,8 @@ namespace SDLTetris
             gameMode = GameMode.STANDBY;
             processEvent = processStandByEvent;
 
-            UInt64 startTime = SDL.SDL_GetTicks64();
-            UInt64 startTimeH = startTime;
+            UInt64 startTimeV = SDL.SDL_GetTicks64();
+            UInt64 startTimeH = startTimeV;
 
             UInt64 curTime = 0;
 
@@ -345,29 +449,196 @@ namespace SDLTetris
 
                 if (gameMode == GameMode.PLAY){
 
-                    curTime = SDL.SDL_GetTicks64();
-                    if ((curTime-startTime)>30){
-                        startTime = curTime;
-                        if (curTetromino!=null){
-                            curTetromino.y += 3; 
-                        }
+                    if (curTetromino!=null){
 
-                    }
+                        if (horizontalMove!=0){
+                            
+                            curTime = SDL.SDL_GetTicks64();
+                            
+                            if ((curTime - startTimeH) > 20){
+                                startTimeH = curTime;
 
-                    if ((curTime - startTimeH) > 30)
-                    {
-                        startTimeH = curTime;
-                        if (VelH != 0)
-                        {
-                            if (curTetromino != null)
-                            {
-                                curTetromino.x += VelH;
+                                for(int i=0;i<4;i++){
+                                    curTetromino.x += horizontalMove;
+                                    if (horizontalMove<0){
+                                        if (curTetromino.IsOutLeft()){
+                                            curTetromino.x -= horizontalMove;
+                                            horizontalMove = 0;
+                                            break; 
+                                        }else{
+                                            var idHit = curTetromino.HitGround(board);
+                                            if (idHit>=0){
+                                                curTetromino.x -= horizontalMove;
+                                                horizontalMove = 0;
+                                                break;
+                                            }
+                                        }
+
+                                    }else if (horizontalMove>0){
+                                        if (curTetromino.IsOutRight()){
+                                            curTetromino.x -= horizontalMove;
+                                            horizontalMove = 0;
+                                            break; 
+                                        }else{
+                                            var idHit = curTetromino.HitGround(board);
+                                            if (idHit>=0){
+                                                curTetromino.x -= horizontalMove;
+                                                horizontalMove = 0;
+                                                break;
+                                            }
+                                        }
+
+                                    }
+
+                                    if (horizontalMove!=0){
+                                        if (horizontalStartColumn!= curTetromino.Column()){
+                                            curTetromino.x -= horizontalMove;
+                                            horizontalMove = 0;
+                                            break;
+                                        }
+
+                                    }
+
+                                }
+
                             }
-                        }
+ 
+                        }else if (fDrop){
+                            curTime = SDL.SDL_GetTicks64();
+                            if ((curTime - startTimeV) > 10){
+                                startTimeV = curTime;
+                                for(int i=0;i<6;i++){
+                                    //-- Move down to Check
+                                    curTetromino.y++;
+                                    var idHit = curTetromino.HitGround(board);
+                                    if (idHit>=0){
+                                        curTetromino.y--;
+                                        FreezeCurTetromino();
+                                        NewTetromino();
+                                        fDrop = false;
+                                    }else if (curTetromino.IsOutBottom()){
+                                        curTetromino.y--;
+                                        FreezeCurTetromino();
+                                        NewTetromino();
+                                        fDrop = false;
+                                    }
+                                    if (fDrop){
 
+                                        if ((curTime-startTimeH)>20){
+                                            curTetromino.x += VelH;
+                                            if (VelH<0){
+                                                if (curTetromino.IsOutLeft()){
+                                                    curTetromino.x -= VelH;
+                                                }else{
+                                                    idHit = curTetromino.HitGround(board);
+                                                    if (idHit>=0){
+                                                        curTetromino.x -= VelH;
+                                                    }else{
+                                                        startTimeH = curTime;
+                                                        horizontalMove = VelH;
+                                                        horizontalStartColumn = curTetromino.Column();
+                                                        break;
+                                                    }
+
+                                                }
+
+                                            }else if (VelH>0){
+                                                if (curTetromino.IsOutRight()){
+                                                    curTetromino.x -= VelH;
+                                                }else{
+                                                    idHit = curTetromino.HitGround(board);
+                                                    if (idHit>=0){
+                                                        curTetromino.x -= VelH;
+                                                    }else{
+                                                        startTimeH = curTime;
+                                                        horizontalMove = VelH;
+                                                        horizontalStartColumn = curTetromino.Column();
+                                                        break;
+                                                    }
+                                                }
+
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                        }else{
+                            curTime = SDL.SDL_GetTicks64();
+
+                            ulong limitElapse;
+                            if (fFastDown) {
+                                limitElapse = 10;
+                            }else{
+                                limitElapse = 35;
+                            }
+
+                            if ( (curTime-startTimeV)>limitElapse ){
+                                startTimeV = curTime;
+                                
+                                for(int i=0;i<3;i++){
+                                    //-- Move down to check
+                                    curTetromino.y++;
+                                    var fMove = true;
+                                    var idHit = curTetromino.HitGround(board);
+                                    if (idHit>=0){
+                                        curTetromino.y--;
+                                        FreezeCurTetromino();
+                                        NewTetromino();
+                                        fMove = false;
+                                    }else if (curTetromino.IsOutBottom()){
+                                        curTetromino.y--;
+                                        FreezeCurTetromino();
+                                        NewTetromino();
+                                        fMove = false;
+                                    }
+
+                                    if (fMove){
+                                        if (VelH!=0){
+                                            if ((curTime-startTimeH)>15){
+                                                startTimeH = curTime;
+                                                curTetromino.x += VelH;
+                                                if (VelH<0){
+                                                    if (curTetromino.IsOutLeft()){
+                                                        curTetromino.x -= VelH;
+                                                    }else{
+                                                        idHit = curTetromino.HitGround(board);
+                                                        if (idHit>=0){
+                                                            curTetromino.x -= VelH;
+                                                        }else{
+                                                            horizontalMove = VelH;
+                                                            horizontalStartColumn = curTetromino.Column();
+                                                            break;
+                                                        }
+                                                    }
+
+                                                }else if (VelH>0){
+                                                    if (curTetromino.IsOutRight()){
+                                                        curTetromino.x -= VelH;
+                                                    }else{
+                                                        idHit = curTetromino.HitGround(board);
+                                                        if (idHit>=0){
+                                                            curTetromino.x -= VelH;
+                                                        }else{
+                                                            horizontalMove = VelH;
+                                                            horizontalStartColumn = curTetromino.Column();
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+
+                                            }
+
+                                        }
+                                    }
+
+                                }
+                            }                            
+                        }
+                    
                     }
 
- 
+
                     //--
                     if (curTetromino!=null){
                         curTetromino.Draw(renderer);
