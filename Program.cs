@@ -876,10 +876,12 @@ namespace SDLTetris
 
         static void Main(string[] args)
         {
-            
+
             SDL.SDL_SetHint(SDL.SDL_HINT_WINDOWS_DISABLE_THREAD_NAMING, "1");
 
-			SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
+			if (SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING)<0){
+                Console.WriteLine($"There was an issue initializing SDL. {SDL.SDL_GetError()}");
+            }
 
             SDL_ttf.TTF_Init();
 
