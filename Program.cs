@@ -76,6 +76,8 @@ namespace SDLTetris
         static public Int32 idTetrominoBag = 14;
         static public Int32[] tetrominoBag = {1,2,3,4,5,6,7,1,2,3,4,5,6,7};  
 
+        static public IntPtr sound = IntPtr.Zero;
+
         //---------------------------------------------------------------------
         //-- Play Mode
         static bool processPlayEvent(ref SDL.SDL_Event e){
@@ -354,7 +356,7 @@ namespace SDLTetris
                 var nbLines = EraseCompletedLines();
                 if (nbLines>0){
                     curScore += ComputeScore(nbLines);
-
+                    SDL_mixer.Mix_PlayChannel(SDL_mixer.MIX_DEFAULT_CHANNELS,sound,0);
                 } 
             }
 
@@ -393,6 +395,19 @@ namespace SDLTetris
             var tt_font = SDL_ttf.TTF_OpenFont(filePathFont, 18);
             SDL_ttf.TTF_SetFontStyle(tt_font,SDL_ttf.TTF_STYLE_BOLD|SDL_ttf.TTF_STYLE_ITALIC);
 
+            string filePathMusic = curDir + "\\Tetris.wav";
+            SDL_mixer.Mix_OpenAudio(44100,SDL_mixer.MIX_DEFAULT_FORMAT,SDL_mixer.MIX_DEFAULT_CHANNELS,1024);
+            var music = SDL_mixer.Mix_LoadMUS(filePathMusic);
+            if (music!=null){
+                SDL_mixer.Mix_PlayMusic(music,-1);
+                SDL_mixer.Mix_VolumeMusic(20);
+            }
+
+            string filePathSound = curDir + "\\109662__grunz__success.wav";
+            sound = SDL_mixer.Mix_LoadWAV(filePathSound);
+            if (sound!=null){
+                SDL_mixer.Mix_Volume(-1,10);
+            }
 
             var window = IntPtr.Zero;
             
@@ -570,7 +585,7 @@ namespace SDLTetris
                             if (fFastDown) {
                                 limitElapse = 10;
                             }else{
-                                limitElapse = 35;
+                                limitElapse = 25;
                             }
 
                             if ( (curTime-startTimeV)>limitElapse ){
@@ -669,6 +684,14 @@ namespace SDLTetris
             SDL_ttf.TTF_CloseFont(tt_font);
 
             SDL_ttf.TTF_Quit();
+
+            if (music!=null){
+                SDL_mixer.Mix_FreeMusic(music);
+            }
+            if (sound!=null){
+                SDL_mixer.Mix_FreeChunk(sound);
+            }
+            SDL_mixer.Mix_Quit();
 
 			SDL.SDL_Quit();
             
