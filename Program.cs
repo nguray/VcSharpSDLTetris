@@ -1,6 +1,8 @@
 ﻿
 using System;
 using SDL2;
+using System.IO;
+using System.Text;
 
 namespace SDLTetris
 {
@@ -43,6 +45,19 @@ namespace SDLTetris
         }
     }
 
+    class HighScore{
+
+        public string Name  {get; set;}
+        public int    Score {get; set;}
+
+        public HighScore(string name,int score)
+        {
+            Name = name;
+            Score = score;
+        }
+
+    }
+
     class Program
     {
 
@@ -77,21 +92,74 @@ namespace SDLTetris
         static public Int32 idTetrominoBag = 14;
         static public Int32[] tetrominoBag = {1,2,3,4,5,6,7,1,2,3,4,5,6,7};  
 
-        static public IntPtr sound = IntPtr.Zero;
+        static Dictionary<SDL.SDL_Keycode, char> keys = new Dictionary<SDL.SDL_Keycode, char>{
+            {SDL.SDL_Keycode.SDLK_a,'A'},
+            {SDL.SDL_Keycode.SDLK_b,'B'},
+            {SDL.SDL_Keycode.SDLK_c,'C'},
+            {SDL.SDL_Keycode.SDLK_d,'D'},
+            {SDL.SDL_Keycode.SDLK_e,'E'},
+            {SDL.SDL_Keycode.SDLK_f,'F'},
+            {SDL.SDL_Keycode.SDLK_i,'I'},
+            {SDL.SDL_Keycode.SDLK_j,'J'},
+            {SDL.SDL_Keycode.SDLK_k,'K'},
+            {SDL.SDL_Keycode.SDLK_l,'L'},
+            {SDL.SDL_Keycode.SDLK_m,'M'},
+            {SDL.SDL_Keycode.SDLK_n,'N'},
+            {SDL.SDL_Keycode.SDLK_o,'O'},
+            {SDL.SDL_Keycode.SDLK_p,'P'},
+            {SDL.SDL_Keycode.SDLK_q,'Q'},
+            {SDL.SDL_Keycode.SDLK_r,'R'},
+            {SDL.SDL_Keycode.SDLK_s,'S'},
+            {SDL.SDL_Keycode.SDLK_t,'T'},
+            {SDL.SDL_Keycode.SDLK_u,'U'},
+            {SDL.SDL_Keycode.SDLK_v,'V'},
+            {SDL.SDL_Keycode.SDLK_w,'W'},
+            {SDL.SDL_Keycode.SDLK_x,'X'},
+            {SDL.SDL_Keycode.SDLK_y,'Y'},
+            {SDL.SDL_Keycode.SDLK_z,'Z'},
+            {SDL.SDL_Keycode.SDLK_KP_0,'0'},
+            {SDL.SDL_Keycode.SDLK_KP_1,'1'},
+            {SDL.SDL_Keycode.SDLK_KP_2,'2'},
+            {SDL.SDL_Keycode.SDLK_KP_3,'3'},
+            {SDL.SDL_Keycode.SDLK_KP_4,'4'},
+            {SDL.SDL_Keycode.SDLK_KP_5,'5'},
+            {SDL.SDL_Keycode.SDLK_KP_6,'6'},
+            {SDL.SDL_Keycode.SDLK_KP_7,'7'},
+            {SDL.SDL_Keycode.SDLK_KP_8,'8'},
+            {SDL.SDL_Keycode.SDLK_KP_9,'9'},
+            {SDL.SDL_Keycode.SDLK_0,'0'},
+            {SDL.SDL_Keycode.SDLK_1,'1'},
+            {SDL.SDL_Keycode.SDLK_2,'2'},
+            {SDL.SDL_Keycode.SDLK_3,'3'},
+            {SDL.SDL_Keycode.SDLK_4,'4'},
+            {SDL.SDL_Keycode.SDLK_5,'5'},
+            {SDL.SDL_Keycode.SDLK_6,'6'},
+            {SDL.SDL_Keycode.SDLK_7,'7'},
+            {SDL.SDL_Keycode.SDLK_8,'8'},
+            {SDL.SDL_Keycode.SDLK_9,'9'}
+        };
+
+        public static List<HighScore> highScores = new List<HighScore>();
+        public static Int32  idHighScore = -1;
+        public static string playerName = "";
+
+        public static bool fExitProgram = false;
 
         //---------------------------------------------------------------------
         //-- Play Mode
         static bool processPlayEvent(ref SDL.SDL_Event e){
-            bool quit = false;
+            bool fStopGame = false;
             switch(e.type)
             {
                 case SDL.SDL_EventType.SDL_QUIT:
-                    quit = true;
+                    fExitProgram = true;
+                    fStopGame = true;
                     break;
                 case SDL.SDL_EventType.SDL_KEYDOWN:
                     if (e.key.repeat==0){
                         switch (e.key.keysym.sym){
                             case SDL.SDL_Keycode.SDLK_ESCAPE:
+                                fStopGame = true;
                                 gameMode = GameMode.STANDBY;
                                 processEvent = processStandByEvent;
                                 break;
@@ -104,6 +172,39 @@ namespace SDLTetris
                             case SDL.SDL_Keycode.SDLK_UP:
                                 if (curTetromino!=null){
                                     curTetromino.RotateLeft();
+                                    var idHit = curTetromino.HitGround(board);
+                                    if (idHit>=0){
+                                        //-- Undo Rotate
+                                        curTetromino.RotateRight();
+                                    }else if (curTetromino.IsOutRight()){
+                                        var backupX = curTetromino.x;
+                                        //-- Move Inside board
+                                        while (curTetromino.IsOutRight()){
+                                            curTetromino.x--;
+                                        }
+                                        idHit = curTetromino.HitGround(board);
+                                        if (idHit>=0){
+                                            curTetromino.x = backupX;
+                                            //-- Undo Rotate
+                                            curTetromino.RotateRight();
+
+                                        }
+                                    }else if (curTetromino.IsOutLeft()){
+                                        var backupX = curTetromino.x;
+                                        //-- Move Inside Board
+                                        while(curTetromino.IsOutLeft()){
+                                            curTetromino.x++;
+                                        }
+                                        idHit = curTetromino.HitGround(board);
+                                        if (idHit>=0){
+                                            curTetromino.x = backupX;
+                                            //-- Undo Rotate
+                                            curTetromino.RotateRight();
+
+                                        }
+
+                                    }
+
                                 }
                                 break;
                             case SDL.SDL_Keycode.SDLK_DOWN:
@@ -129,7 +230,7 @@ namespace SDLTetris
                      }
                     break;
             }
-            return quit;
+            return fStopGame;
         }
 
         static void DrawScore(IntPtr renderer,IntPtr tt_font){
@@ -173,12 +274,14 @@ namespace SDLTetris
             {
                 case SDL.SDL_EventType.SDL_QUIT:
                     quit = true;
+                    fExitProgram = true;
                     break;
                 case SDL.SDL_EventType.SDL_KEYDOWN:
                     if (e.key.repeat==0){
                         switch (e.key.keysym.sym){
                             case SDL.SDL_Keycode.SDLK_ESCAPE:
                                 quit = true;
+                                fExitProgram = true;
                                 break;
                             case SDL.SDL_Keycode.SDLK_SPACE:
                                 gameMode = GameMode.PLAY;
@@ -248,6 +351,231 @@ namespace SDLTetris
             }
 
 
+        }
+
+        //---------------------------------------------------------------------
+        //-- HighScores Mode
+        static bool processHighScoresEvent(ref SDL.SDL_Event e){
+            bool quit = false;
+            switch(e.type)
+            {
+                case SDL.SDL_EventType.SDL_QUIT:
+                    fExitProgram = true;
+                    quit = true;
+                    break;
+                case SDL.SDL_EventType.SDL_KEYDOWN:
+                    if (e.key.repeat==0){
+                        switch (e.key.keysym.sym){
+                            case SDL.SDL_Keycode.SDLK_ESCAPE:
+                                quit = true;
+                                break;
+                            case SDL.SDL_Keycode.SDLK_BACKSPACE:
+                                if (playerName.Length==1){
+                                    playerName = "";
+                                }else if (playerName.Length>1){
+                                    playerName = playerName.Substring(0,playerName.Length-1);
+                                }
+                                highScores[idHighScore].Name = playerName;
+                                break;
+                            case SDL.SDL_Keycode.SDLK_RETURN or SDL.SDL_Keycode.SDLK_KP_ENTER:
+                                if (playerName.Length==0){
+                                    playerName = "XXXXXX";
+                                }
+                                highScores[idHighScore].Name = playerName;
+                                saveHighScores();
+                                gameMode = GameMode.STANDBY;
+                                processEvent = processStandByEvent;
+                                break;
+                            default:
+                                char c;
+                                if (keys.TryGetValue(e.key.keysym.sym,out c)){
+                                    if (playerName.Length<8){
+                                        playerName += c;
+                                    }
+                                    highScores[idHighScore].Name = playerName;
+                                    //Console.WriteLine(userName);
+                                }
+                                break;
+                        }
+                    }
+                    break;
+            }
+            return quit;
+        }
+
+        static void DrawHighScores(IntPtr renderer,IntPtr tt_font){
+
+            var fg = new SDL.SDL_Color {
+                r = 255,
+                g = 255,
+                b = 0,
+                a = 255
+            };
+
+            var yLine = Globals.TOP + Globals.cellSize;
+            var txtTitle = "HIGH SCORES";
+            var surfTitle = SDL_ttf.TTF_RenderUTF8_Blended(tt_font,txtTitle,fg);
+            if (surfTitle!=IntPtr.Zero){
+
+                var textureSCore =  SDL.SDL_CreateTextureFromSurface(renderer,surfTitle);
+                if (textureSCore!=IntPtr.Zero){
+                    uint format;
+                    int access,w,h;
+                    SDL.SDL_QueryTexture(textureSCore,out format,out access,out w,out h);
+                    var desRect = new SDL.SDL_Rect {
+                        x = Globals.LEFT + (Globals.NB_COLUMNS/2)*Globals.cellSize - w/2, 
+                        y = yLine,
+                        w = w,
+                        h = h
+                    };
+                    SDL.SDL_RenderCopy(renderer,textureSCore, IntPtr.Zero ,ref desRect);
+                    SDL.SDL_DestroyTexture(textureSCore);
+                    yLine += 3*h;
+                }
+
+                SDL.SDL_free(surfTitle);
+            }
+
+            var xCol0 = Globals.LEFT + Globals.cellSize;
+            var xCol1 = Globals.LEFT + (Globals.NB_COLUMNS/2+2)*Globals.cellSize;
+            foreach(var h in highScores){
+                int access,width, heigh = 0;
+                var surfName = SDL_ttf.TTF_RenderUTF8_Blended(tt_font,h.Name,fg);
+                if (surfName!=IntPtr.Zero){
+                    var textureName =  SDL.SDL_CreateTextureFromSurface(renderer,surfName);
+                    if (textureName!=IntPtr.Zero){
+                        uint format;
+                        SDL.SDL_QueryTexture(textureName,out format,out access,out width,out heigh);
+
+                        SDL.SDL_Rect desRect;
+                        desRect.x = xCol0;
+                        desRect.y = yLine;
+                        desRect.w = width;
+                        desRect.h = heigh;
+                        SDL.SDL_RenderCopy(renderer,textureName, IntPtr.Zero ,ref desRect);
+                        SDL.SDL_DestroyTexture(textureName);
+                   }
+
+                    SDL.SDL_free(surfName);
+    
+                }
+                
+                var txtScore = String.Format("{0:00000}", h.Score);
+                var surfScore = SDL_ttf.TTF_RenderUTF8_Blended(tt_font,txtScore,fg);
+                if (surfScore!=IntPtr.Zero){
+                    var textureScore =  SDL.SDL_CreateTextureFromSurface(renderer,surfScore);
+                    if (textureScore!=IntPtr.Zero){
+                        uint format;
+                        SDL.SDL_QueryTexture(textureScore,out format,out access,out width,out heigh);
+
+                        SDL.SDL_Rect desRect;
+                        desRect.x = xCol1;
+                        desRect.y = yLine;
+                        desRect.w = width;
+                        desRect.h = heigh;
+                        SDL.SDL_RenderCopy(renderer,textureScore, IntPtr.Zero ,ref desRect);
+                        SDL.SDL_DestroyTexture(textureScore);
+                    }
+
+                    SDL.SDL_free(surfScore);
+    
+                }
+
+                yLine += heigh + 8;
+                
+            }
+
+        }
+
+        public static (string Name, int score) ParseHighScore(string line)
+        {
+            //------------------------------------------------------                
+            char[] delimiterChars = { ' ', ',', '.', ':', '\t' };
+            string[] words = line.Split(delimiterChars);
+            string n = words[0];
+            int    s = int.Parse(words[1]);
+            return (n,s);
+
+        } 
+
+        public static void loadHighScores()
+        {
+            int     iLine = 0;
+            string  name;
+            int     score;
+            string  path = @"HighScores.txt";
+            //------------------------------------------------------
+            try
+            {
+                
+                highScores.Clear();
+
+                foreach (string line in System.IO.File.ReadLines(path))
+                {
+                    //--
+                    (name, score) = ParseHighScore( line);
+                    highScores.Add(new HighScore(name,score));
+                    //--
+                    iLine++;
+                    if (iLine>9) break;
+
+                }
+            }
+            catch (FileNotFoundException uAEx)
+            {
+                Console.WriteLine(uAEx.Message);
+            }
+        
+        }
+
+        public static void WriteLine(FileStream fs, string value)
+        {
+            //------------------------------------------------------
+            byte[] info = new UTF8Encoding(true).GetBytes(value);
+            fs.Write(info, 0, info.Length);
+        }
+
+        public static void saveHighScores()
+        {
+            string path = @"HighScores.txt";
+            //------------------------------------------------------
+            // Delete the file if it exists.
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+
+            using (FileStream fs = File.Create(path))
+            {
+                String lin;
+                foreach ( var h in highScores ){
+                    lin = String.Format("{0},{1}\n", h.Name, h.Score);
+                    WriteLine(fs, lin);
+                }
+
+            }
+
+            
+        }
+
+        public static void insertHighScore(int id,String name,int score){
+            if ((id>=0)&&(id<10)){
+                highScores.Insert(id, new HighScore(name, score));
+                if (highScores.Count>10){
+                    highScores.RemoveAt(highScores.Count-1);
+                }
+            }
+        }
+
+        public static Int32 IsHighScore(int score)
+        {
+            //---------------------------------------------------
+            for (int i=0;i<10;i++){
+                if (score>highScores[i].Score){
+                    return i;
+                }
+            }
+            return -1;
         }
 
         //---------------------------------------------------------------------
@@ -421,7 +749,7 @@ namespace SDLTetris
             }
 
             string filePathSound = curDir + "\\109662__grunz__success.wav";
-            sound = SDL_mixer.Mix_LoadWAV(filePathSound);
+            var sound = SDL_mixer.Mix_LoadWAV(filePathSound);
             if (sound!=null){
                 SDL_mixer.Mix_Volume(-1,10);
             }
@@ -441,9 +769,7 @@ namespace SDLTetris
 
             InitGame();
 
-            // for(int i = 0;i<10;i++){
-            //     board[Globals.NB_COLUMNS + i] = 2;
-            // }
+            loadHighScores();
 
             gameMode = GameMode.STANDBY;
             processEvent = processStandByEvent;
@@ -456,8 +782,9 @@ namespace SDLTetris
             SDL.SDL_Event e;
             SDL.SDL_Rect rect;
 
-            bool quit = false;
-            while(!quit)
+            bool fStopGame = false;
+
+            while(!fStopGame)
             {
 
                 SDL.SDL_SetRenderDrawColor(renderer,48,48,255,255);
@@ -476,7 +803,29 @@ namespace SDLTetris
 
                 while (SDL.SDL_PollEvent(out e)!=0)
                 {
-                    quit = processEvent(ref e);
+                    fStopGame = processEvent(ref e);
+                    
+                    if (fExitProgram){
+                        break;
+                    }
+
+                    if (fStopGame){
+
+                        fStopGame = false;
+                        idHighScore = IsHighScore(curScore);
+                        if (idHighScore>=0){
+                            insertHighScore(idHighScore,playerName,curScore);
+                            gameMode = GameMode.HIGHT_SCORES;
+                            processEvent = processHighScoresEvent;
+                            InitGame();
+                        }else{
+                            InitGame();
+                            gameMode = GameMode.STANDBY;
+                            processEvent = processStandByEvent;
+                        }
+
+                    }
+                    
                 }
 
                 if (gameMode == GameMode.PLAY){
@@ -688,6 +1037,10 @@ namespace SDLTetris
                 }else if (gameMode == GameMode.STANDBY){
 
                     DrawStandBy(renderer,tt_font);
+
+                }else if (gameMode == GameMode.HIGHT_SCORES){
+
+                    DrawHighScores(renderer,tt_font);
 
                 }
 
