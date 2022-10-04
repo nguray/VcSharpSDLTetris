@@ -550,27 +550,29 @@ namespace SDLTetris
             int     score;
             string  path = @"HighScores.txt";
             //------------------------------------------------------
-            try
+            if (File.Exists(path))
             {
-                
-                highScores.Clear();
-
-                foreach (string line in System.IO.File.ReadLines(path))
+                try
                 {
-                    //--
-                    (name, score) = ParseHighScore( line);
-                    highScores.Add(new HighScore(name,score));
-                    //--
-                    iLine++;
-                    if (iLine>9) break;
+                    
+                    highScores.Clear();
 
+                    foreach (string line in System.IO.File.ReadLines(path))
+                    {
+                        //--
+                        (name, score) = ParseHighScore( line);
+                        highScores.Add(new HighScore(name,score));
+                        //--
+                        iLine++;
+                        if (iLine>9) break;
+
+                    }
+                }
+                catch (FileNotFoundException uAEx)
+                {
+                    Console.WriteLine(uAEx.Message);
                 }
             }
-            catch (FileNotFoundException uAEx)
-            {
-                Console.WriteLine(uAEx.Message);
-            }
-        
         }
 
         public static void WriteLine(FileStream fs, string value)
