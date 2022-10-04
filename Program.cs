@@ -1,4 +1,9 @@
-﻿
+﻿/*--------------------------------------------*\
+		Simple Tetris using sdl2
+                 2022
+		  Raymond NGUYEN THANH
+\*--------------------------------------------*/
+
 using System;
 using SDL2;
 using System.IO;
@@ -871,6 +876,8 @@ namespace SDLTetris
 
         static void Main(string[] args)
         {
+            
+            SDL.SDL_SetHint(SDL.SDL_HINT_WINDOWS_DISABLE_THREAD_NAMING, "1");
 
 			SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
 
@@ -1172,7 +1179,6 @@ namespace SDLTetris
                         }
                     
                     }
-
 
                     //--
                     if (curTetromino!=null){
