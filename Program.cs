@@ -618,6 +618,107 @@ namespace SDLTetris
             return -1;
         }
 
+
+        //---------------------------------------------------------------------
+        //-- Game Over Mode
+
+        static bool processGameOverEvent(ref SDL.SDL_Event e){
+            bool quit = false;
+            switch(e.type)
+            {
+                case SDL.SDL_EventType.SDL_QUIT:
+                    quit = true;
+                    fExitProgram = true;
+                    break;
+                case SDL.SDL_EventType.SDL_KEYDOWN:
+                    if (e.key.repeat==0){
+                        switch (e.key.keysym.sym){
+                            case SDL.SDL_Keycode.SDLK_ESCAPE:
+                                quit = true;
+                                fExitProgram = true;
+                                break;
+                            case SDL.SDL_Keycode.SDLK_SPACE:
+                                gameMode = GameMode.STANDBY;
+                                processEvent = processStandByEvent;
+                                break;
+                        }
+                    }
+                    break;
+            }
+            return quit;
+        }
+
+        static void DrawGameOver(IntPtr renderer,IntPtr tt_font){
+
+            var fg = new SDL.SDL_Color {
+                r = 255,
+                g = 255,
+                b = 0,
+                a = 255
+            };
+
+            var yLine = Globals.TOP + (Globals.NB_ROWS/4)*Globals.cellSize;
+            var txtScore = "Game Over";
+            var surfScore = SDL_ttf.TTF_RenderUTF8_Blended(tt_font,txtScore,fg);
+            if (surfScore!=IntPtr.Zero){
+
+                var textureSCore =  SDL.SDL_CreateTextureFromSurface(renderer,surfScore);
+                if (textureSCore!=IntPtr.Zero){
+                    uint format;
+                    int access,w,h;
+                    SDL.SDL_QueryTexture(textureSCore,out format,out access,out w,out h);
+                    var desRect = new SDL.SDL_Rect {
+                        x = Globals.LEFT + (Globals.NB_COLUMNS/2)*Globals.cellSize - w/2, 
+                        y = yLine,
+                        w = w,
+                        h = h
+                    };
+                    SDL.SDL_RenderCopy(renderer,textureSCore, IntPtr.Zero ,ref desRect);
+                    SDL.SDL_DestroyTexture(textureSCore);
+                    yLine += 2*h + 4;
+                }
+
+                SDL.SDL_free(surfScore);
+            }
+
+            txtScore = "Press SPACE to Continue";
+            surfScore = SDL_ttf.TTF_RenderUTF8_Blended(tt_font,txtScore,fg);
+            if (surfScore!=IntPtr.Zero){
+
+                var textureSCore =  SDL.SDL_CreateTextureFromSurface(renderer,surfScore);
+                if (textureSCore!=IntPtr.Zero){
+                    uint format;
+                    int access,w,h;
+                    SDL.SDL_QueryTexture(textureSCore,out format,out access,out w,out h);
+
+                    SDL.SDL_Rect desRect;
+                    desRect.x = Globals.LEFT + (Globals.NB_COLUMNS/2)*Globals.cellSize - w/2;
+                    desRect.y = yLine;
+                    desRect.w = w;
+                    desRect.h = h;
+                    SDL.SDL_RenderCopy(renderer,textureSCore, IntPtr.Zero ,ref desRect);
+                    SDL.SDL_DestroyTexture(textureSCore);
+                }
+
+                SDL.SDL_free(surfScore);
+            }
+
+
+        }
+
+        public static bool isGameOver()
+        {
+            //----------------------------------------
+            for(int c=0;c<Globals.NB_COLUMNS;c++){
+                if (board[c]!=0){
+                    return true;
+                }
+            }
+            return false;
+        }
+
+
+
         //---------------------------------------------------------------------
         //--
 
@@ -1078,6 +1179,23 @@ namespace SDLTetris
                         curTetromino.Draw(renderer);
                     }
 
+                    //-- Check Game Over
+                    if (isGameOver()){
+                        idHighScore = IsHighScore(curScore);
+                        if (idHighScore>=0){
+                            insertHighScore(idHighScore,playerName,curScore);
+                            gameMode = GameMode.HIGHT_SCORES;
+                            processEvent = processHighScoresEvent;
+                            InitGame();
+                        }else{
+                            InitGame();
+                            gameMode = GameMode.GAME_OVER;
+                            processEvent = processGameOverEvent;
+                        }
+
+                    }
+
+
                 }else if (gameMode == GameMode.STANDBY){
 
                     DrawStandBy(renderer,tt_font);
@@ -1091,6 +1209,10 @@ namespace SDLTetris
                     }
 
                     DrawHighScores(renderer,tt_font);
+
+                }else if (gameMode == GameMode.GAME_OVER){
+
+                    DrawGameOver(renderer,tt_font);
 
                 }
                 
