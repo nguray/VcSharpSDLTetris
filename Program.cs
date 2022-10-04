@@ -64,6 +64,7 @@ namespace SDLTetris
 
         public static bool fFastDown = false;
         public static bool fDrop = false;
+        public static Int32 nbCompletedLines = 0;
 
         public static int[] board = new int[Globals.NB_COLUMNS*Globals.NB_ROWS];
 
@@ -313,8 +314,9 @@ namespace SDLTetris
             }
         }
 
-        static Int32 EraseCompletedLines(){
-            //---------------------------------------------------
+
+        static Int32 ComputeCompledLines(){
+
             Int32 nbLines = 0;
             bool fCompleted = false;
             for(int r=0;r<Globals.NB_ROWS;r++){
@@ -327,17 +329,32 @@ namespace SDLTetris
                 }
                 if (fCompleted){
                     nbLines++;
+                }
+            }
+            return nbLines;
+        }
+
+        static void EraseFirstCompletedLine(){
+            //---------------------------------------------------
+            bool fCompleted = false;
+            for(int r=0;r<Globals.NB_ROWS;r++){
+                fCompleted = true;
+                for(int c=0;c<Globals.NB_COLUMNS;c++){
+                    if (board[r*Globals.NB_COLUMNS+c]==0){
+                        fCompleted = false;
+                        break;
+                    }
+                }
+                if (fCompleted){
                     //-- Décaler d'une ligne le plateau
                     for(int r1=r;r1>0;r1--){
                         for(int c1=0;c1<Globals.NB_COLUMNS;c1++){
                             board[r1*Globals.NB_COLUMNS+c1] = board[(r1-1)*Globals.NB_COLUMNS+c1];
                         }
                     }
-
+                    return;
                 }
             }
-
-            return nbLines;
         } 
 
         static void FreezeCurTetromino(){
@@ -353,10 +370,10 @@ namespace SDLTetris
                     }
                 }
                 //--
-                var nbLines = EraseCompletedLines();
-                if (nbLines>0){
-                    curScore += ComputeScore(nbLines);
-                    SDL_mixer.Mix_PlayChannel(SDL_mixer.MIX_DEFAULT_CHANNELS,sound,0);
+                nbCompletedLines = ComputeCompledLines();
+                if (nbCompletedLines>0){
+                    curScore += ComputeScore(nbCompletedLines);
+                    
                 } 
             }
 
@@ -466,7 +483,16 @@ namespace SDLTetris
 
                     if (curTetromino!=null){
 
-                        if (horizontalMove!=0){
+                        if (nbCompletedLines>0){
+                            curTime = SDL.SDL_GetTicks64();
+                            if ((curTime - startTimeV) > 200){
+                                startTimeV = curTime;
+                                nbCompletedLines--;
+                                EraseFirstCompletedLine();
+                                SDL_mixer.Mix_PlayChannel(SDL_mixer.MIX_DEFAULT_CHANNELS,sound,0);
+                            }
+
+                        }else if (horizontalMove!=0){
                             
                             curTime = SDL.SDL_GetTicks64();
                             
