@@ -139,9 +139,22 @@ namespace SDLTetris
             {SDL.SDL_Keycode.SDLK_9,'9'}
         };
 
-        public static List<HighScore> highScores = new List<HighScore>();
+        public static List<HighScore> highScores = new List<HighScore>() {
+            {new HighScore("XXXXXX", 0)},
+            {new HighScore("XXXXXX", 0)},
+            {new HighScore("XXXXXX", 0)},
+            {new HighScore("XXXXXX", 0)},
+            {new HighScore("XXXXXX", 0)},
+            {new HighScore("XXXXXX", 0)},
+            {new HighScore("XXXXXX", 0)},
+            {new HighScore("XXXXXX", 0)},
+            {new HighScore("XXXXXX", 0)},
+            {new HighScore("XXXXXX", 0)}
+        };
         public static Int32  idHighScore = -1;
         public static string playerName = "";
+        static public Int32 iColorHighScore = 0;
+
 
         public static bool fExitProgram = false;
 
@@ -404,14 +417,14 @@ namespace SDLTetris
         }
 
         static void DrawHighScores(IntPtr renderer,IntPtr tt_font){
-
-            var fg = new SDL.SDL_Color {
+ 
+            SDL.SDL_Color fg;
+            fg = new SDL.SDL_Color {
                 r = 255,
                 g = 255,
                 b = 0,
                 a = 255
             };
-
             var yLine = Globals.TOP + Globals.cellSize;
             var txtTitle = "HIGH SCORES";
             var surfTitle = SDL_ttf.TTF_RenderUTF8_Blended(tt_font,txtTitle,fg);
@@ -438,8 +451,35 @@ namespace SDLTetris
 
             var xCol0 = Globals.LEFT + Globals.cellSize;
             var xCol1 = Globals.LEFT + (Globals.NB_COLUMNS/2+2)*Globals.cellSize;
-            foreach(var h in highScores){
+            for(int i=0;i<highScores.Count;i++){
                 int access,width, heigh = 0;
+                var h = highScores[i];
+
+                 if (i==idHighScore){
+                    if ((iColorHighScore % 2)>0){
+                        fg = new SDL.SDL_Color {
+                            r = 255,
+                            g = 255,
+                            b = 0,
+                            a = 255
+                        };
+                    }else{
+                        fg = new SDL.SDL_Color {
+                            r = 155,
+                            g = 155,
+                            b = 0,
+                            a = 255
+                        };
+                    }
+                }else{
+                    fg = new SDL.SDL_Color {
+                        r = 255,
+                        g = 255,
+                        b = 0,
+                        a = 255
+                    };
+                }
+
                 var surfName = SDL_ttf.TTF_RenderUTF8_Blended(tt_font,h.Name,fg);
                 if (surfName!=IntPtr.Zero){
                     var textureName =  SDL.SDL_CreateTextureFromSurface(renderer,surfName);
@@ -738,19 +778,20 @@ namespace SDLTetris
             var curDir = Directory.GetCurrentDirectory();
             string filePathFont = curDir + "\\sansation.ttf";
             var tt_font = SDL_ttf.TTF_OpenFont(filePathFont, 18);
-            SDL_ttf.TTF_SetFontStyle(tt_font,SDL_ttf.TTF_STYLE_BOLD|SDL_ttf.TTF_STYLE_ITALIC);
-
+            if (tt_font!=IntPtr.Zero){
+                SDL_ttf.TTF_SetFontStyle(tt_font,SDL_ttf.TTF_STYLE_BOLD|SDL_ttf.TTF_STYLE_ITALIC);
+            }
             string filePathMusic = curDir + "\\Tetris.wav";
             SDL_mixer.Mix_OpenAudio(44100,SDL_mixer.MIX_DEFAULT_FORMAT,SDL_mixer.MIX_DEFAULT_CHANNELS,1024);
             var music = SDL_mixer.Mix_LoadMUS(filePathMusic);
-            if (music!=null){
+            if (music!=IntPtr.Zero){
                 SDL_mixer.Mix_PlayMusic(music,-1);
                 SDL_mixer.Mix_VolumeMusic(20);
             }
 
             string filePathSound = curDir + "\\109662__grunz__success.wav";
             var sound = SDL_mixer.Mix_LoadWAV(filePathSound);
-            if (sound!=null){
+            if (sound!=IntPtr.Zero){
                 SDL_mixer.Mix_Volume(-1,10);
             }
 
@@ -776,6 +817,7 @@ namespace SDLTetris
 
             UInt64 startTimeV = SDL.SDL_GetTicks64();
             UInt64 startTimeH = startTimeV;
+            UInt64 startTimeR = startTimeV;
 
             UInt64 curTime = 0;
 
@@ -838,7 +880,9 @@ namespace SDLTetris
                                 startTimeV = curTime;
                                 nbCompletedLines--;
                                 EraseFirstCompletedLine();
-                                SDL_mixer.Mix_PlayChannel(SDL_mixer.MIX_DEFAULT_CHANNELS,sound,0);
+                                if (sound!=IntPtr.Zero){
+                                    SDL_mixer.Mix_PlayChannel(SDL_mixer.MIX_DEFAULT_CHANNELS,sound,0);
+                                }
                             }
 
                         }else if (horizontalMove!=0){
@@ -1040,12 +1084,22 @@ namespace SDLTetris
 
                 }else if (gameMode == GameMode.HIGHT_SCORES){
 
+                    curTime = SDL.SDL_GetTicks64();
+                    if ((curTime-startTimeH)>200){
+                        startTimeH = curTime;
+                        iColorHighScore++;
+                    }
+
                     DrawHighScores(renderer,tt_font);
 
                 }
-
                 
                 if (nextTetromino!=null){
+                    curTime = SDL.SDL_GetTicks64();
+                    if ((curTime-startTimeR)>500){
+                        startTimeR = curTime;
+                        nextTetromino.RotateLeft();
+                    }
                     nextTetromino.Draw(renderer);
                 }
                 
@@ -1060,14 +1114,15 @@ namespace SDLTetris
 
             SDL.SDL_DestroyWindow(window);
 
-            SDL_ttf.TTF_CloseFont(tt_font);
-
+            if (tt_font!=IntPtr.Zero){
+                SDL_ttf.TTF_CloseFont(tt_font);
+            }
             SDL_ttf.TTF_Quit();
 
-            if (music!=null){
+            if (music!=IntPtr.Zero){
                 SDL_mixer.Mix_FreeMusic(music);
             }
-            if (sound!=null){
+            if (sound!=IntPtr.Zero){
                 SDL_mixer.Mix_FreeChunk(sound);
             }
             SDL_mixer.Mix_Quit();

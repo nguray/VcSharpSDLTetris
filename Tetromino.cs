@@ -67,12 +67,14 @@ namespace SDLTetris
         {
             int     x,y;
             //-------------------------------------------
-            for (int i=0;i<vectors.Count;i++){
-                var v = vectors[i];
-                x = -v.y;
-                y = v.x;
-                v.x = x;
-                v.y = y;
+            if (type!=5){
+                for (int i=0;i<vectors.Count;i++){
+                    var v = vectors[i];
+                    x = -v.y;
+                    y = v.x;
+                    v.x = x;
+                    v.y = y;
+                }
             }
 
         }
@@ -81,14 +83,15 @@ namespace SDLTetris
         {
             int     x,y;
             //-------------------------------------------
-            for (int i=0;i<vectors.Count;i++){
-                var v = vectors[i];
-                x = v.y;
-                y = -v.x;
-                v.x = x;
-                v.y = y;
-           }
-            
+           if (type!=5){
+                for (int i=0;i<vectors.Count;i++){
+                    var v = vectors[i];
+                    x = v.y;
+                    y = -v.x;
+                    v.x = x;
+                    v.y = y;
+                }
+           }            
         }
 
         public int MaxY1() {
@@ -145,7 +148,7 @@ namespace SDLTetris
         public Int32 HitGround(int[] board){
             Int32 ix,iy;
             Int32 x,y;
-            Int32 iHit,typ;
+            Int32 iHit;
 
             foreach(var v in vectors){
 
