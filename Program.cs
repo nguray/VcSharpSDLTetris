@@ -1,7 +1,7 @@
 ﻿/*--------------------------------------------*\
 		Simple Tetris using sdl2
-                 2022
-		  Raymond NGUYEN THANH
+                
+	Raymond NGUYEN THANH            2022-10-06
 \*--------------------------------------------*/
 
 using System;
@@ -1011,14 +1011,8 @@ namespace SDLTetris
                                             horizontalMove = 0;
                                             break; 
                                         }else{
-<<<<<<< HEAD
                                             if (curTetromino.HitGround(board)){
                                                 curTetromino.x -= horizontalMove;
-=======
-                                            var idHit = curTetromino.HitGround(board);
-                                            if (idHit>=0){
-                                                curTetromino.x = backupX;
->>>>>>> 8f52ab72b09affa28b7874230547a0cb78ef7c03
                                                 horizontalMove = 0;
                                                 break;
                                             }
@@ -1030,14 +1024,8 @@ namespace SDLTetris
                                             horizontalMove = 0;
                                             break; 
                                         }else{
-<<<<<<< HEAD
                                             if (curTetromino.HitGround(board)){
                                                 curTetromino.x -= horizontalMove;
-=======
-                                            var idHit = curTetromino.HitGround(board);
-                                            if (idHit>=0){
-                                                curTetromino.x = backupX;
->>>>>>> 8f52ab72b09affa28b7874230547a0cb78ef7c03
                                                 horizontalMove = 0;
                                                 break;
                                             }
@@ -1085,14 +1073,8 @@ namespace SDLTetris
                                                 if (curTetromino.IsOutLeft()){
                                                     curTetromino.x = backupX;
                                                 }else{
-<<<<<<< HEAD
                                                     if (curTetromino.HitGround(board)){
                                                         curTetromino.x -= VelH;
-=======
-                                                    idHit = curTetromino.HitGround(board);
-                                                    if (idHit>=0){
-                                                        curTetromino.x = backupX;
->>>>>>> 8f52ab72b09affa28b7874230547a0cb78ef7c03
                                                     }else{
                                                         startTimeH = curTime;
                                                         horizontalMove = VelH;
@@ -1106,14 +1088,8 @@ namespace SDLTetris
                                                 if (curTetromino.IsOutRight()){
                                                     curTetromino.x = backupX;
                                                 }else{
-<<<<<<< HEAD
                                                     if (curTetromino.HitGround(board)){
                                                         curTetromino.x -= VelH;
-=======
-                                                    idHit = curTetromino.HitGround(board);
-                                                    if (idHit>=0){
-                                                        curTetromino.x = backupX;
->>>>>>> 8f52ab72b09affa28b7874230547a0cb78ef7c03
                                                     }else{
                                                         startTimeH = curTime;
                                                         horizontalMove = VelH;
@@ -1168,14 +1144,8 @@ namespace SDLTetris
                                                     if (curTetromino.IsOutLeft()){
                                                         curTetromino.x = backupX;
                                                     }else{
-<<<<<<< HEAD
                                                         if (curTetromino.HitGround(board)){
                                                             curTetromino.x -= VelH;
-=======
-                                                        idHit = curTetromino.HitGround(board);
-                                                        if (idHit>=0){
-                                                            curTetromino.x = backupX;
->>>>>>> 8f52ab72b09affa28b7874230547a0cb78ef7c03
                                                         }else{
                                                             startTimeH = curTime;
                                                             horizontalMove = VelH;
@@ -1188,14 +1158,8 @@ namespace SDLTetris
                                                     if (curTetromino.IsOutRight()){
                                                         curTetromino.x = backupX;
                                                     }else{
-<<<<<<< HEAD
                                                         if (curTetromino.HitGround(board)){
                                                             curTetromino.x -= VelH;
-=======
-                                                        idHit = curTetromino.HitGround(board);
-                                                        if (idHit>=0){
-                                                            curTetromino.x = backupX;
->>>>>>> 8f52ab72b09affa28b7874230547a0cb78ef7c03
                                                         }else{
                                                             startTimeH = curTime;
                                                             horizontalMove = VelH;
