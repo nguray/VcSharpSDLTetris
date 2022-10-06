@@ -1,7 +1,7 @@
 ﻿/*--------------------------------------------*\
 		Simple Tetris using sdl2
                 
-	Raymond NGUYEN THANH            2022-10-06
+	Raymond NGUYEN THANH         2022-10-06
 \*--------------------------------------------*/
 
 using System;
