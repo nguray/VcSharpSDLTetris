@@ -1263,5 +1263,5 @@ namespace SDLTetris
 
         }
 	
-	}
+    }
 }
