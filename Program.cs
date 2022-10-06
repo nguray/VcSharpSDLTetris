@@ -1242,21 +1242,24 @@ namespace SDLTetris
 
             SDL.SDL_DestroyWindow(window);
 
-            if (tt_font!=IntPtr.Zero){
+            if (tt_font != IntPtr.Zero)
+            {
                 SDL_ttf.TTF_CloseFont(tt_font);
             }
             SDL_ttf.TTF_Quit();
 
-            if (music!=IntPtr.Zero){
+            if (music != IntPtr.Zero)
+            {
                 SDL_mixer.Mix_FreeMusic(music);
             }
-            if (sound!=IntPtr.Zero){
+            if (sound != IntPtr.Zero)
+            {
                 SDL_mixer.Mix_FreeChunk(sound);
             }
             SDL_mixer.Mix_Quit();
 
-			SDL.SDL_Quit();
-            
+            SDL.SDL_Quit();
+
 
         }
 	
