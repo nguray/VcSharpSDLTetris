@@ -190,8 +190,7 @@ namespace SDLTetris
                             case SDL.SDL_Keycode.SDLK_UP:
                                 if (curTetromino!=null){
                                     curTetromino.RotateLeft();
-                                    var idHit = curTetromino.HitGround(board);
-                                    if (idHit>=0){
+                                    if (curTetromino.HitGround(board)){
                                         //-- Undo Rotate
                                         curTetromino.RotateRight();
                                     }else if (curTetromino.IsOutRight()){
@@ -200,8 +199,7 @@ namespace SDLTetris
                                         while (curTetromino.IsOutRight()){
                                             curTetromino.x--;
                                         }
-                                        idHit = curTetromino.HitGround(board);
-                                        if (idHit>=0){
+                                        if (curTetromino.HitGround(board)){
                                             curTetromino.x = backupX;
                                             //-- Undo Rotate
                                             curTetromino.RotateRight();
@@ -213,8 +211,7 @@ namespace SDLTetris
                                         while(curTetromino.IsOutLeft()){
                                             curTetromino.x++;
                                         }
-                                        idHit = curTetromino.HitGround(board);
-                                        if (idHit>=0){
+                                        if (curTetromino.HitGround(board)){
                                             curTetromino.x = backupX;
                                             //-- Undo Rotate
                                             curTetromino.RotateRight();
@@ -1012,8 +1009,7 @@ namespace SDLTetris
                                             horizontalMove = 0;
                                             break; 
                                         }else{
-                                            var idHit = curTetromino.HitGround(board);
-                                            if (idHit>=0){
+                                            if (curTetromino.HitGround(board)){
                                                 curTetromino.x -= horizontalMove;
                                                 horizontalMove = 0;
                                                 break;
@@ -1026,8 +1022,7 @@ namespace SDLTetris
                                             horizontalMove = 0;
                                             break; 
                                         }else{
-                                            var idHit = curTetromino.HitGround(board);
-                                            if (idHit>=0){
+                                            if (curTetromino.HitGround(board)){
                                                 curTetromino.x -= horizontalMove;
                                                 horizontalMove = 0;
                                                 break;
@@ -1056,8 +1051,7 @@ namespace SDLTetris
                                 for(int i=0;i<6;i++){
                                     //-- Move down to Check
                                     curTetromino.y++;
-                                    var idHit = curTetromino.HitGround(board);
-                                    if (idHit>=0){
+                                    if (curTetromino.HitGround(board)){
                                         curTetromino.y--;
                                         FreezeCurTetromino();
                                         NewTetromino();
@@ -1076,8 +1070,7 @@ namespace SDLTetris
                                                 if (curTetromino.IsOutLeft()){
                                                     curTetromino.x -= VelH;
                                                 }else{
-                                                    idHit = curTetromino.HitGround(board);
-                                                    if (idHit>=0){
+                                                    if (curTetromino.HitGround(board)){
                                                         curTetromino.x -= VelH;
                                                     }else{
                                                         startTimeH = curTime;
@@ -1092,8 +1085,7 @@ namespace SDLTetris
                                                 if (curTetromino.IsOutRight()){
                                                     curTetromino.x -= VelH;
                                                 }else{
-                                                    idHit = curTetromino.HitGround(board);
-                                                    if (idHit>=0){
+                                                    if (curTetromino.HitGround(board)){
                                                         curTetromino.x -= VelH;
                                                     }else{
                                                         startTimeH = curTime;
@@ -1126,8 +1118,7 @@ namespace SDLTetris
                                     //-- Move down to check
                                     curTetromino.y++;
                                     var fMove = true;
-                                    var idHit = curTetromino.HitGround(board);
-                                    if (idHit>=0){
+                                    if (curTetromino.HitGround(board)){
                                         curTetromino.y--;
                                         FreezeCurTetromino();
                                         NewTetromino();
@@ -1148,8 +1139,7 @@ namespace SDLTetris
                                                     if (curTetromino.IsOutLeft()){
                                                         curTetromino.x -= VelH;
                                                     }else{
-                                                        idHit = curTetromino.HitGround(board);
-                                                        if (idHit>=0){
+                                                        if (curTetromino.HitGround(board)){
                                                             curTetromino.x -= VelH;
                                                         }else{
                                                             horizontalMove = VelH;
@@ -1162,8 +1152,7 @@ namespace SDLTetris
                                                     if (curTetromino.IsOutRight()){
                                                         curTetromino.x -= VelH;
                                                     }else{
-                                                        idHit = curTetromino.HitGround(board);
-                                                        if (idHit>=0){
+                                                        if (curTetromino.HitGround(board)){
                                                             curTetromino.x -= VelH;
                                                         }else{
                                                             horizontalMove = VelH;

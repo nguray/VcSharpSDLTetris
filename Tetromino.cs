@@ -145,7 +145,7 @@ namespace SDLTetris
             return (b>Globals.NB_ROWS*Globals.cellSize);
         }
 
-        public Int32 HitGround(int[] board){
+        public bool HitGround(int[] board){
             Int32 ix,iy;
             Int32 x,y;
             Int32 iHit;
@@ -160,7 +160,7 @@ namespace SDLTetris
                 if ((ix >= 0) && ix < Globals.NB_COLUMNS && (iy >= 0) && (iy < Globals.NB_ROWS)){
                     iHit = iy*Globals.NB_COLUMNS + ix;
                     if (board[iHit] != 0) {
-                        return iHit;
+                        return true;
                     }
 
                 }
@@ -173,7 +173,7 @@ namespace SDLTetris
                 if ((ix >= 0) && ix < Globals.NB_COLUMNS && (iy >= 0) && (iy < Globals.NB_ROWS)){
                     iHit = iy*Globals.NB_COLUMNS + ix;
                     if (board[iHit] != 0) {
-                        return iHit;
+                        return true;
                     }
 
                 }
@@ -186,7 +186,7 @@ namespace SDLTetris
                 if ((ix >= 0) && ix < Globals.NB_COLUMNS && (iy >= 0) && (iy < Globals.NB_ROWS)){
                     iHit = iy*Globals.NB_COLUMNS + ix;
                     if (board[iHit] != 0) {
-                        return iHit;
+                        return true;
                     }
 
                 }
@@ -199,7 +199,7 @@ namespace SDLTetris
                 if ((ix >= 0) && ix < Globals.NB_COLUMNS && (iy >= 0) && (iy < Globals.NB_ROWS)){
                     iHit = iy*Globals.NB_COLUMNS + ix;
                     if (board[iHit] != 0) {
-                        return iHit;
+                        return true;
                     }
 
                 }
@@ -207,7 +207,7 @@ namespace SDLTetris
             }
 
 
-            return -1;
+            return false;
         }
 
         public Int32 Column(){
