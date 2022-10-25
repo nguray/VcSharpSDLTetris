@@ -140,69 +140,100 @@ namespace SDLTetris
             return (r > Globals.NB_COLUMNS*Globals.cellSize);
         }
 
+        public bool IsOutLRLimit(Int32 veloH){
+            if (veloH<0){
+                return IsOutLeft();
+            }else if (veloH>0){
+                return IsOutRight();
+            }
+            return true;
+        }
+
         public bool IsOutBottom(){
             var b = MaxY1()*Globals.cellSize + Globals.cellSize + y;
             return (b>Globals.NB_ROWS*Globals.cellSize);
         }
 
         public bool HitGround(int[] board){
-            Int32 ix,iy;
             Int32 x,y;
-            Int32 iHit;
+
+            Func< int, int, bool> Hit = (x, y) => {
+                Int32 ix = x / Globals.cellSize;
+                Int32 iy = y / Globals.cellSize;
+                if ((ix >= 0) && ix < Globals.NB_COLUMNS && (iy >= 0) && (iy < Globals.NB_ROWS)){
+                    if (board[iy*Globals.NB_COLUMNS + ix] != 0) {
+                        return true;
+                    }
+
+                }
+                return false;
+            };
 
             foreach(var v in vectors){
 
                 x = v.x*Globals.cellSize + this.x + 1;
                 y = v.y*Globals.cellSize + this.y + 1;
-                ix = x / Globals.cellSize;
-                iy = y / Globals.cellSize;
-
-                if ((ix >= 0) && ix < Globals.NB_COLUMNS && (iy >= 0) && (iy < Globals.NB_ROWS)){
-                    iHit = iy*Globals.NB_COLUMNS + ix;
-                    if (board[iHit] != 0) {
-                        return true;
-                    }
-
+                if (Hit(x,y)){
+                    return true;
                 }
+
+                // ix = x / Globals.cellSize;
+                // iy = y / Globals.cellSize;
+                // if ((ix >= 0) && ix < Globals.NB_COLUMNS && (iy >= 0) && (iy < Globals.NB_ROWS)){
+                //     iHit = iy*Globals.NB_COLUMNS + ix;
+                //     if (board[iHit] != 0) {
+                //         return true;
+                //     }
+
+                // }
 
                 x = v.x*Globals.cellSize + Globals.cellSize - 1 + this.x;
                 y = v.y*Globals.cellSize + this.y + 1;
-                ix = x / Globals.cellSize;
-                iy = y / Globals.cellSize;
-
-                if ((ix >= 0) && ix < Globals.NB_COLUMNS && (iy >= 0) && (iy < Globals.NB_ROWS)){
-                    iHit = iy*Globals.NB_COLUMNS + ix;
-                    if (board[iHit] != 0) {
-                        return true;
-                    }
-
+                if (Hit(x,y)){
+                    return true;
                 }
+
+                // ix = x / Globals.cellSize;
+                // iy = y / Globals.cellSize;
+                // if ((ix >= 0) && ix < Globals.NB_COLUMNS && (iy >= 0) && (iy < Globals.NB_ROWS)){
+                //     iHit = iy*Globals.NB_COLUMNS + ix;
+                //     if (board[iHit] != 0) {
+                //         return true;
+                //     }
+
+                // }
 
                 x = v.x*Globals.cellSize + Globals.cellSize - 1 + this.x;
                 y = v.y*Globals.cellSize + Globals.cellSize - 1 + this.y;
-                ix = x / Globals.cellSize;
-                iy = y / Globals.cellSize;
-
-                if ((ix >= 0) && ix < Globals.NB_COLUMNS && (iy >= 0) && (iy < Globals.NB_ROWS)){
-                    iHit = iy*Globals.NB_COLUMNS + ix;
-                    if (board[iHit] != 0) {
-                        return true;
-                    }
-
+                if (Hit(x,y)){
+                    return true;
                 }
+
+                // ix = x / Globals.cellSize;
+                // iy = y / Globals.cellSize;
+                // if ((ix >= 0) && ix < Globals.NB_COLUMNS && (iy >= 0) && (iy < Globals.NB_ROWS)){
+                //     iHit = iy*Globals.NB_COLUMNS + ix;
+                //     if (board[iHit] != 0) {
+                //         return true;
+                //     }
+
+                // }
 
                 x = v.x*Globals.cellSize + this.x + 1;
                 y = v.y*Globals.cellSize + Globals.cellSize - 1 + this.y;
-                ix = x / Globals.cellSize;
-                iy = y / Globals.cellSize;
-
-                if ((ix >= 0) && ix < Globals.NB_COLUMNS && (iy >= 0) && (iy < Globals.NB_ROWS)){
-                    iHit = iy*Globals.NB_COLUMNS + ix;
-                    if (board[iHit] != 0) {
-                        return true;
-                    }
-
+                if (Hit(x,y)){
+                    return true;
                 }
+
+                // ix = x / Globals.cellSize;
+                // iy = y / Globals.cellSize;
+                // if ((ix >= 0) && ix < Globals.NB_COLUMNS && (iy >= 0) && (iy < Globals.NB_ROWS)){
+                //     iHit = iy*Globals.NB_COLUMNS + ix;
+                //     if (board[iHit] != 0) {
+                //         return true;
+                //     }
+
+                // }
 
             }
 

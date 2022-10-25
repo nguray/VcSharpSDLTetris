@@ -94,6 +94,10 @@ namespace SDLTetris
         public delegate bool ProcessEvent(ref SDL.SDL_Event e);
         static ProcessEvent? processEvent;
 
+        public delegate bool IsOutLimit_t();
+        static IsOutLimit_t? IsOutLimit;
+
+
         static public Int32 idTetrominoBag = 14;
         static public Int32[] tetrominoBag = {1,2,3,4,5,6,7,1,2,3,4,5,6,7};  
 
@@ -183,9 +187,11 @@ namespace SDLTetris
                                 break;
                             case SDL.SDL_Keycode.SDLK_LEFT:
                                 VelH = -1;
+                                IsOutLimit = curTetromino.IsOutLeft;
                                 break;
                             case SDL.SDL_Keycode.SDLK_RIGHT:
                                 VelH = 1;                            
+                                IsOutLimit = curTetromino.IsOutRight;
                                 break;
                             case SDL.SDL_Keycode.SDLK_UP:
                                 if (curTetromino!=null){
@@ -235,9 +241,11 @@ namespace SDLTetris
                     switch (e.key.keysym.sym){
                         case SDL.SDL_Keycode.SDLK_LEFT:
                             VelH = 0;
+                            IsOutLimit = IsOutAlways;
                             break;
                         case SDL.SDL_Keycode.SDLK_RIGHT:
                             VelH = 0;                            
+                            IsOutLimit = IsOutAlways;
                             break;
                         case SDL.SDL_Keycode.SDLK_DOWN:
                             fFastDown = false;
@@ -873,6 +881,10 @@ namespace SDLTetris
             return iTyp;
         }
 
+        static bool IsOutAlways(){
+            return true;
+        }
+
         static void Main(string[] args)
         {
 
@@ -923,6 +935,7 @@ namespace SDLTetris
 
             gameMode = GameMode.STANDBY;
             processEvent = processStandByEvent;
+            IsOutLimit = IsOutAlways;
 
             UInt64 startTimeV = SDL.SDL_GetTicks64();
             UInt64 startTimeH = startTimeV;
@@ -1005,32 +1018,16 @@ namespace SDLTetris
 
                                     var backupX = curTetromino.x;
                                     curTetromino.x += horizontalMove;
-                                    if (horizontalMove<0){
-                                        if (curTetromino.IsOutLeft()){
-                                            curTetromino.x = backupX;
+                                    if (curTetromino.IsOutLRLimit(horizontalMove)){
+                                        curTetromino.x = backupX;
+                                        horizontalMove = 0;
+                                        break; 
+                                    }else{
+                                        if (curTetromino.HitGround(board)){
+                                            curTetromino.x -= horizontalMove;
                                             horizontalMove = 0;
-                                            break; 
-                                        }else{
-                                            if (curTetromino.HitGround(board)){
-                                                curTetromino.x -= horizontalMove;
-                                                horizontalMove = 0;
-                                                break;
-                                            }
+                                            break;
                                         }
-
-                                    }else if (horizontalMove>0){
-                                        if (curTetromino.IsOutRight()){
-                                            curTetromino.x = backupX;
-                                            horizontalMove = 0;
-                                            break; 
-                                        }else{
-                                            if (curTetromino.HitGround(board)){
-                                                curTetromino.x -= horizontalMove;
-                                                horizontalMove = 0;
-                                                break;
-                                            }
-                                        }
-
                                     }
 
                                     if (horizontalMove!=0){
@@ -1069,35 +1066,17 @@ namespace SDLTetris
                                         if ((curTime-startTimeH)>20){
                                             var backupX = curTetromino.x;
                                             curTetromino.x += VelH;
-                                            if (VelH<0){
-                                                if (curTetromino.IsOutLeft()){
-                                                    curTetromino.x = backupX;
+                                            if (IsOutLimit()){
+                                                curTetromino.x = backupX;
+                                            }else{
+                                                if (curTetromino.HitGround(board)){
+                                                    curTetromino.x -= VelH;
                                                 }else{
-                                                    if (curTetromino.HitGround(board)){
-                                                        curTetromino.x -= VelH;
-                                                    }else{
-                                                        startTimeH = curTime;
-                                                        horizontalMove = VelH;
-                                                        horizontalStartColumn = curTetromino.Column();
-                                                        break;
-                                                    }
-
+                                                    startTimeH = curTime;
+                                                    horizontalMove = VelH;
+                                                    horizontalStartColumn = curTetromino.Column();
+                                                    break;
                                                 }
-
-                                            }else if (VelH>0){
-                                                if (curTetromino.IsOutRight()){
-                                                    curTetromino.x = backupX;
-                                                }else{
-                                                    if (curTetromino.HitGround(board)){
-                                                        curTetromino.x -= VelH;
-                                                    }else{
-                                                        startTimeH = curTime;
-                                                        horizontalMove = VelH;
-                                                        horizontalStartColumn = curTetromino.Column();
-                                                        break;
-                                                    }
-                                                }
-
                                             }
                                         }
                                         
@@ -1140,32 +1119,17 @@ namespace SDLTetris
 
                                                 var backupX = curTetromino.x;
                                                 curTetromino.x += VelH;
-                                                if (VelH<0){
-                                                    if (curTetromino.IsOutLeft()){
-                                                        curTetromino.x = backupX;
-                                                    }else{
-                                                        if (curTetromino.HitGround(board)){
-                                                            curTetromino.x -= VelH;
-                                                        }else{
-                                                            startTimeH = curTime;
-                                                            horizontalMove = VelH;
-                                                            horizontalStartColumn = curTetromino.Column();
-                                                            break;
-                                                        }
-                                                    }
 
-                                                }else if (VelH>0){
-                                                    if (curTetromino.IsOutRight()){
-                                                        curTetromino.x = backupX;
+                                                if (IsOutLimit()){
+                                                    curTetromino.x = backupX;
+                                                }else{
+                                                    if (curTetromino.HitGround(board)){
+                                                        curTetromino.x -= VelH;
                                                     }else{
-                                                        if (curTetromino.HitGround(board)){
-                                                            curTetromino.x -= VelH;
-                                                        }else{
-                                                            startTimeH = curTime;
-                                                            horizontalMove = VelH;
-                                                            horizontalStartColumn = curTetromino.Column();
-                                                            break;
-                                                        }
+                                                        startTimeH = curTime;
+                                                        horizontalMove = VelH;
+                                                        horizontalStartColumn = curTetromino.Column();
+                                                        break;
                                                     }
                                                 }
 
