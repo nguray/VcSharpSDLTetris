@@ -1014,7 +1014,7 @@ namespace SDLTetris
 
                                     var backupX = curTetromino.x;
                                     curTetromino.x += horizontalMove;
-                                    Console.WriteLine(horizontalMove);
+                                    //Console.WriteLine(horizontalMove);
                                     if (IsOutLimit()){
                                         curTetromino.x = backupX;
                                         horizontalMove = 0;
