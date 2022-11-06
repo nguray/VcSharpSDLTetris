@@ -241,11 +241,9 @@ namespace SDLTetris
                     switch (e.key.keysym.sym){
                         case SDL.SDL_Keycode.SDLK_LEFT:
                             VelH = 0;
-                            IsOutLimit = IsOutAlways;
                             break;
                         case SDL.SDL_Keycode.SDLK_RIGHT:
                             VelH = 0;                            
-                            IsOutLimit = IsOutAlways;
                             break;
                         case SDL.SDL_Keycode.SDLK_DOWN:
                             fFastDown = false;
@@ -1012,25 +1010,25 @@ namespace SDLTetris
                             curTime = SDL.SDL_GetTicks64();
                             
                             if ((curTime - startTimeH) > 20){
-                                startTimeH = curTime;
-
                                 for(int i=0;i<4;i++){
 
                                     var backupX = curTetromino.x;
                                     curTetromino.x += horizontalMove;
-                                    if (curTetromino.IsOutLRLimit(horizontalMove)){
+                                    Console.WriteLine(horizontalMove);
+                                    if (IsOutLimit()){
                                         curTetromino.x = backupX;
                                         horizontalMove = 0;
                                         break; 
                                     }else{
                                         if (curTetromino.HitGround(board)){
-                                            curTetromino.x -= horizontalMove;
+                                            curTetromino.x = backupX;
                                             horizontalMove = 0;
                                             break;
                                         }
                                     }
 
                                     if (horizontalMove!=0){
+                                        startTimeH = curTime;
                                         if (horizontalStartColumn!= curTetromino.Column()){
                                             curTetromino.x = backupX;
                                             horizontalMove = 0;
@@ -1044,6 +1042,7 @@ namespace SDLTetris
                             }
  
                         }else if (fDrop){
+
                             curTime = SDL.SDL_GetTicks64();
                             if ((curTime - startTimeV) > 10){
                                 startTimeV = curTime;
@@ -1061,21 +1060,19 @@ namespace SDLTetris
                                         NewTetromino();
                                         fDrop = false;
                                     }
-                                    if (fDrop){
-
-                                        if ((curTime-startTimeH)>20){
+                                    if ((fDrop)&&(VelH!=0)){
+                                        if ((curTime-startTimeH)>15){
                                             var backupX = curTetromino.x;
                                             curTetromino.x += VelH;
                                             if (IsOutLimit()){
                                                 curTetromino.x = backupX;
                                             }else{
                                                 if (curTetromino.HitGround(board)){
-                                                    curTetromino.x -= VelH;
+                                                    curTetromino.x = backupX;
                                                 }else{
-                                                    startTimeH = curTime;
                                                     horizontalMove = VelH;
                                                     horizontalStartColumn = curTetromino.Column();
-                                                    break;
+                                                    break;  
                                                 }
                                             }
                                         }
