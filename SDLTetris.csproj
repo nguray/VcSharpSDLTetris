@@ -9,9 +9,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="sansation.ttf" />
-    <EmbeddedResource Include="109662__grunz__success.wav" />
-    <EmbeddedResource Include="Tetris.wav" />
+    <EmbeddedResource Include="res/sansation.ttf" />
+    <EmbeddedResource Include="res/109662__grunz__success.wav" />
+    <EmbeddedResource Include="res/Tetris.wav" />
   </ItemGroup>
 
 </Project>
