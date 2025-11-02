@@ -8,4 +8,10 @@
 	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="sansation.ttf" />
+    <EmbeddedResource Include="109662__grunz__success.wav" />
+    <EmbeddedResource Include="Tetris.wav" />
+  </ItemGroup>
+
 </Project>

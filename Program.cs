@@ -8,6 +8,8 @@ using System;
 using SDL2;
 using System.IO;
 using System.Text;
+using System.Reflection;
+
 
 namespace SDLTetris
 {
@@ -894,21 +896,77 @@ namespace SDLTetris
 
             SDL_ttf.TTF_Init();
 
-            var curDir = Directory.GetCurrentDirectory();
-            string filePathFont = curDir + "/sansation.ttf";
+            var names =
+                System
+                .Reflection
+                .Assembly
+                .GetExecutingAssembly()
+                .GetManifestResourceNames();
+
+            foreach (var name in names)
+            {
+                Console.WriteLine(name);
+            }
+
+            //--Extract embedded ressources
+            using (Stream? myStream = Assembly
+                        .GetExecutingAssembly()
+                        .GetManifestResourceStream(@"SDLTetris.sansation.ttf"))
+            {
+                if (myStream is not null)
+                {
+                    using var fileStream = new FileStream("sansation.ttf", FileMode.Create, FileAccess.Write);
+                    {
+                        myStream.CopyTo(fileStream);
+                        fileStream.Close();
+                    }
+                    myStream.Dispose();
+                }
+            }
+            using (Stream? myStream = Assembly
+                        .GetExecutingAssembly()
+                        .GetManifestResourceStream(@"SDLTetris.109662__grunz__success.wav"))
+            {
+                if (myStream is not null)
+                {
+                    using var fileStream = new FileStream("109662__grunz__success.wav", FileMode.Create, FileAccess.Write);
+                    {
+                        myStream.CopyTo(fileStream);
+                        fileStream.Close();
+                    }
+                    myStream.Dispose();
+                }
+            }
+            using (Stream? myStream = Assembly
+                        .GetExecutingAssembly()
+                        .GetManifestResourceStream(@"SDLTetris.Tetris.wav"))
+            {
+                if (myStream is not null)
+                {
+                    using var fileStream = new FileStream("Tetris.wav", FileMode.Create, FileAccess.Write);
+                    {
+                        myStream.CopyTo(fileStream);
+                        fileStream.Close();
+                    }
+                    myStream.Dispose();
+                }
+            }
+            
+
+            //var curDir = Directory.GetCurrentDirectory();
+            string filePathFont = "sansation.ttf";
             var tt_font = SDL_ttf.TTF_OpenFont(filePathFont, 18);
             if (tt_font!=IntPtr.Zero){
                 SDL_ttf.TTF_SetFontStyle(tt_font,SDL_ttf.TTF_STYLE_BOLD|SDL_ttf.TTF_STYLE_ITALIC);
             }
-            string filePathMusic = curDir + "/Tetris.wav";
+            string filePathMusic = "Tetris.wav";
             SDL_mixer.Mix_OpenAudio(44100,SDL_mixer.MIX_DEFAULT_FORMAT,SDL_mixer.MIX_DEFAULT_CHANNELS,1024);
             var music = SDL_mixer.Mix_LoadMUS(filePathMusic);
             if (music!=IntPtr.Zero){
                 SDL_mixer.Mix_PlayMusic(music,-1);
                 SDL_mixer.Mix_VolumeMusic(20);
             }
-
-            string filePathSound = curDir + "/109662__grunz__success.wav";
+            string filePathSound = "109662__grunz__success.wav";
             var sound = SDL_mixer.Mix_LoadWAV(filePathSound);
             if (sound!=IntPtr.Zero){
                 SDL_mixer.Mix_Volume(-1,10);
@@ -1010,7 +1068,7 @@ namespace SDLTetris
                             curTime = SDL.SDL_GetTicks64();
                             
                             if ((curTime - startTimeH) > 20){
-                                for(int i=0;i<4;i++){
+                                for(int i=0;i<5;i++){
 
                                     var backupX = curTetromino.x;
                                     curTetromino.x += horizontalMove;
@@ -1094,7 +1152,7 @@ namespace SDLTetris
                             if ( (curTime-startTimeV)>limitElapse ){
                                 startTimeV = curTime;
                                 
-                                for(int i=0;i<3;i++){
+                                for(int i=0;i<4;i++){
                                     //-- Move down to check
                                     curTetromino.y++;
                                     var fMove = true;
