@@ -1120,6 +1120,7 @@ namespace SDLTetris
                                         FreezeCurTetromino();
                                         NewTetromino();
                                         fDrop = false;
+                                        break;
                                     }
                                     else if (curTetromino.IsOutBottom())
                                     {
@@ -1127,8 +1128,9 @@ namespace SDLTetris
                                         FreezeCurTetromino();
                                         NewTetromino();
                                         fDrop = false;
+                                        break;
                                     }
-                                    if ((fDrop) && (VelH != 0))
+                                    if  (VelH != 0)
                                     {
                                         if ((curTime - startTimeH) > 15)
                                         {
@@ -1180,54 +1182,50 @@ namespace SDLTetris
                                 {
                                     //-- Move down to check
                                     curTetromino.y++;
-                                    var fMove = true;
                                     if (curTetromino.HitGround(board))
                                     {
                                         curTetromino.y--;
                                         FreezeCurTetromino();
                                         NewTetromino();
-                                        fMove = false;
+                                        break;
                                     }
                                     else if (curTetromino.IsOutBottom())
                                     {
                                         curTetromino.y--;
                                         FreezeCurTetromino();
                                         NewTetromino();
-                                        fMove = false;
+                                        break;
                                     }
 
-                                    if (fMove)
+                                    if (VelH != 0)
                                     {
-                                        if (VelH != 0)
+                                        if ((curTime - startTimeH) > 15)
                                         {
-                                            if ((curTime - startTimeH) > 15)
+
+                                            var backupX = curTetromino.x;
+                                            curTetromino.x += VelH;
+
+                                            if (IsOutLimit())
                                             {
-
-                                                var backupX = curTetromino.x;
-                                                curTetromino.x += VelH;
-
-                                                if (IsOutLimit())
+                                                curTetromino.x = backupX;
+                                            }
+                                            else
+                                            {
+                                                if (curTetromino.HitGround(board))
                                                 {
-                                                    curTetromino.x = backupX;
+                                                    curTetromino.x -= VelH;
                                                 }
                                                 else
                                                 {
-                                                    if (curTetromino.HitGround(board))
-                                                    {
-                                                        curTetromino.x -= VelH;
-                                                    }
-                                                    else
-                                                    {
-                                                        startTimeH = curTime;
-                                                        horizontalMove = VelH;
-                                                        horizontalStartColumn = curTetromino.Column();
-                                                        break;
-                                                    }
+                                                    startTimeH = curTime;
+                                                    horizontalMove = VelH;
+                                                    horizontalStartColumn = curTetromino.Column();
+                                                    break;
                                                 }
-
                                             }
 
                                         }
+
                                     }
 
                                 }
