@@ -14,6 +14,7 @@ namespace SDLTetris
 
         ulong startTimeV = 0;
         ulong startTimeH = 0;
+        ulong startTimeE = 0;
 
         public PlayMode(Game g)
         {
@@ -130,6 +131,7 @@ namespace SDLTetris
         {
             startTimeH = 0;
             startTimeV = 0;
+            startTimeE = 0;
         }
 
 
@@ -143,9 +145,9 @@ namespace SDLTetris
             if (g.nbCompletedLines > 0)
             {
                 curTime = SDL.SDL_GetTicks64();
-                if ((curTime - startTimeV) > 200)
+                if ((curTime - startTimeE) > 200)
                 {
-                    startTimeV = curTime;
+                    startTimeE = curTime;
                     g.nbCompletedLines--;
                     g.EraseFirstCompletedLine();
                     if (g.sound != IntPtr.Zero)
@@ -155,7 +157,8 @@ namespace SDLTetris
                 }
 
             }
-            else if (g.horizontalMove != 0)
+            
+            if (g.horizontalMove != 0)
             {
 
                 curTime = SDL.SDL_GetTicks64();
