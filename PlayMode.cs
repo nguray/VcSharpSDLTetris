@@ -48,45 +48,41 @@ namespace SDLTetris
                                 IsOutLimit = curTetro.IsOutRight;
                                 break;
                             case SDL.SDL_Keycode.SDLK_UP:
-                                if (curTetro != null)
+                                curTetro.RotateLeft();
+                                if (curTetro.HitGround(g.board))
                                 {
-                                    curTetro.RotateLeft();
+                                    //-- Undo Rotate
+                                    curTetro.RotateRight();
+                                }
+                                else if (curTetro.IsOutRight())
+                                {
+                                    var backupX = curTetro.x;
+                                    //-- Move Inside board
+                                    while (curTetro.IsOutRight())
+                                    {
+                                        curTetro.x--;
+                                    }
                                     if (curTetro.HitGround(g.board))
                                     {
+                                        curTetro.x = backupX;
                                         //-- Undo Rotate
                                         curTetro.RotateRight();
-                                    }
-                                    else if (curTetro.IsOutRight())
-                                    {
-                                        var backupX = curTetro.x;
-                                        //-- Move Inside board
-                                        while (curTetro.IsOutRight())
-                                        {
-                                            curTetro.x--;
-                                        }
-                                        if (curTetro.HitGround(g.board))
-                                        {
-                                            curTetro.x = backupX;
-                                            //-- Undo Rotate
-                                            curTetro.RotateRight();
 
-                                        }
                                     }
-                                    else if (curTetro.IsOutLeft())
+                                }
+                                else if (curTetro.IsOutLeft())
+                                {
+                                    var backupX = curTetro.x;
+                                    //-- Move Inside Board
+                                    while (curTetro.IsOutLeft())
                                     {
-                                        var backupX = curTetro.x;
-                                        //-- Move Inside Board
-                                        while (curTetro.IsOutLeft())
-                                        {
-                                            curTetro.x++;
-                                        }
-                                        if (curTetro.HitGround(g.board))
-                                        {
-                                            curTetro.x = backupX;
-                                            //-- Undo Rotate
-                                            curTetro.RotateRight();
-
-                                        }
+                                        curTetro.x++;
+                                    }
+                                    if (curTetro.HitGround(g.board))
+                                    {
+                                        curTetro.x = backupX;
+                                        //-- Undo Rotate
+                                        curTetro.RotateRight();
 
                                     }
 
@@ -172,7 +168,7 @@ namespace SDLTetris
                         var backupX = curTetro.x;
                         curTetro.x += g.horizontalMove;
                         //Console.WriteLine(horizontalMove);
-                        if (IsOutLimit())
+                        if ((IsOutLimit!=null)&&IsOutLimit())
                         {
                             curTetro.x = backupX;
                             g.horizontalMove = 0;
@@ -238,7 +234,7 @@ namespace SDLTetris
                             {
                                 var backupX = curTetro.x;
                                 curTetro.x += g.VelH;
-                                if (IsOutLimit())
+                                if ((IsOutLimit!=null)&&IsOutLimit())
                                 {
                                     curTetro.x = backupX;
                                 }
@@ -307,7 +303,7 @@ namespace SDLTetris
                                 var backupX = curTetro.x;
                                 curTetro.x += g.VelH;
 
-                                if (IsOutLimit())
+                                if ((IsOutLimit!=null)&&IsOutLimit())
                                 {
                                     curTetro.x = backupX;
                                 }
@@ -333,25 +329,6 @@ namespace SDLTetris
                     }
                 }
             }
-
-
-            //-- Check Game Over
-            if (g.isGameOver())
-            {
-                g.idHighScore = g.IsHighScore(g.curScore);
-                if (g.idHighScore >= 0)
-                {
-                    g.insertHighScore(g.idHighScore, g.playerName, g.curScore);
-                    g.SetHighScoresMode();
-                    g.InitGame();
-                }
-                else
-                {
-                    g.SetGameOverMode();
-                }
-
-            }
-
 
         }
 

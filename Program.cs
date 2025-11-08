@@ -54,20 +54,6 @@ namespace SDLTetris
         }
     }
 
-    class HighScore
-    {
-
-        public string Name { get; set; }
-        public int Score { get; set; }
-
-        public HighScore(string name, int score)
-        {
-            Name = name;
-            Score = score;
-        }
-
-    }
-
     abstract class IGameMode
     {
         public Game? game;
@@ -103,7 +89,6 @@ namespace SDLTetris
 
             SDL_ttf.TTF_Init();
 
-
             var myGame = new Game();
 
             var names =
@@ -138,24 +123,23 @@ namespace SDLTetris
             while (!fStopGame)
             {
 
-
-
                 while (SDL.SDL_PollEvent(out e) != 0)
                 {
-                    fStopGame = myGame.curMode.ProcessEvent(ref e);
+                    if (myGame.curMode is not IGameMode curMode)
+                    {
+                        fStopGame = false;
+                    }
+                    else
+                    {
+                        fStopGame = curMode.ProcessEvent(ref e);
+                        
+                    }
 
                 }
 
+                myGame.Update();
+
                 myGame.Draw();
-
-                myGame.curMode.Update();
-
-
-                myGame.curMode.Draw();
-
-
-                //--
-                SDL.SDL_RenderPresent(myGame.renderer);
 
             }
 

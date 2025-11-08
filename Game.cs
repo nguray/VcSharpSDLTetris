@@ -7,6 +7,19 @@ using System.Diagnostics.Contracts;
 
 namespace SDLTetris
 {
+    class HighScore
+    {
+
+        public string Name { get; set; }
+        public int Score { get; set; }
+
+        public HighScore(string name, int score)
+        {
+            Name = name;
+            Score = score;
+        }
+
+    }
 
     class Game : System.IDisposable
     {
@@ -168,9 +181,6 @@ namespace SDLTetris
                 board[i] = 0;
             }
 
-            //curTetromino = null;
-            //nextTetromino = new Tetromino(TetrisRandomizer(), (Globals.NB_COLUMNS + 3) * Globals.cellSize, 10 * Globals.cellSize);
-
         }
 
         public bool isGameOver()
@@ -190,6 +200,7 @@ namespace SDLTetris
         {
             curMode = standByMode;
             curMode?.init();
+            InitGame();
 
         }
 
@@ -347,12 +358,16 @@ namespace SDLTetris
             else
             {
                 //-- Shuttle bag
-                for (int i = 0; i < tetrominoBag.Length; i++)
+                if (Globals.rand != null)
                 {
-                    iSrc = Globals.rand.Next(0, 14);
-                    iTyp = tetrominoBag[iSrc];
-                    tetrominoBag[iSrc] = tetrominoBag[0];
-                    tetrominoBag[0] = iTyp;
+                    for (int i = 0; i < tetrominoBag.Length; i++)
+                    {
+                        iSrc = Globals.rand.Next(0, 14);
+                        iTyp = tetrominoBag[iSrc];
+                        tetrominoBag[iSrc] = tetrominoBag[0];
+                        tetrominoBag[0] = iTyp;
+                    }
+                    
                 }
                 iTyp = tetrominoBag[0];
                 idTetrominoBag = 1;
@@ -537,19 +552,50 @@ namespace SDLTetris
             //--
             if (nextTetromino != null)
             {
+                nextTetromino.Draw(renderer);
+            }
+
+            //--
+            curMode?.Draw();
+
+            //--
+            SDL.SDL_RenderPresent(renderer);
+
+        }
+
+        public void Update()
+        {
+            if (curMode != null)
+            {
+                curMode.Update();            
+            }
+
+            if (nextTetromino != null)
+            {
                 ulong curTime = SDL.SDL_GetTicks64();
                 if ((curTime - startTimeR) > 500)
                 {
                     startTimeR = curTime;
                     nextTetromino.RotateLeft();
                 }
-                nextTetromino.Draw(renderer);
             }
 
-        }
+            //-- Check Game Over
+            if (isGameOver())
+            {
+                idHighScore = IsHighScore(curScore);
+                if (idHighScore >= 0)
+                {
+                    insertHighScore(idHighScore, playerName, curScore);
+                    SetHighScoresMode();
+                    InitGame();
+                }
+                else
+                {
+                    SetGameOverMode();
+                }
 
-        public void Update()
-        {
+            }
 
         }
 
