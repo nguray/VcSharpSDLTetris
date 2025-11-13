@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using System.Reflection;
 using System.Diagnostics.Contracts;
+using Microsoft.VisualBasic.FileIO;
 
 namespace SDLTetris
 {
@@ -24,6 +25,10 @@ namespace SDLTetris
     class Game : System.IDisposable
     {
         const string TITLE = "C# SDL2 Tetris";
+
+        const string SANSATION_TTF = "sansation.ttf";
+        const string TETRIS_WAV = "Tetris.wav";
+        const string SUCCES_WAV = "109662__grunz__success.wav";
 
         public int VelH = 0;
         public int curScore = 0;
@@ -111,18 +116,18 @@ namespace SDLTetris
         void LoadResources()
         {
             //--Extract embedded ressources
-            getEmbeddedResource("sansation.ttf");
-            getEmbeddedResource("109662__grunz__success.wav");
-            getEmbeddedResource("Tetris.wav");
+            getEmbeddedResource(SANSATION_TTF);
+            getEmbeddedResource(SUCCES_WAV);
+            getEmbeddedResource(TETRIS_WAV);
 
             //var curDir = Directory.GetCurrentDirectory();
-            string filePathFont = "sansation.ttf";
+            string filePathFont = SANSATION_TTF;
             tt_font = SDL_ttf.TTF_OpenFont(filePathFont, 18);
             if (tt_font != IntPtr.Zero)
             {
                 SDL_ttf.TTF_SetFontStyle(tt_font, SDL_ttf.TTF_STYLE_BOLD | SDL_ttf.TTF_STYLE_ITALIC);
             }
-            string filePathMusic = "Tetris.wav";
+            string filePathMusic = TETRIS_WAV;
             SDL_mixer.Mix_OpenAudio(44100, SDL_mixer.MIX_DEFAULT_FORMAT, SDL_mixer.MIX_DEFAULT_CHANNELS, 1024);
             music = SDL_mixer.Mix_LoadMUS(filePathMusic);
             if (music != IntPtr.Zero)
@@ -130,7 +135,7 @@ namespace SDLTetris
                 SDL_mixer.Mix_PlayMusic(music, -1);
                 SDL_mixer.Mix_VolumeMusic(20);
             }
-            string filePathSound = "109662__grunz__success.wav";
+            string filePathSound = SUCCES_WAV;
             sound = SDL_mixer.Mix_LoadWAV(filePathSound);
             if (sound != IntPtr.Zero)
             {
@@ -141,12 +146,12 @@ namespace SDLTetris
 
         void FreeResources()
         {
+            //--
             if (tt_font != IntPtr.Zero)
             {
                 SDL_ttf.TTF_CloseFont(tt_font);
                 tt_font = IntPtr.Zero;
             }
-
             if (music != IntPtr.Zero)
             {
                 SDL_mixer.Mix_FreeMusic(music);
@@ -157,6 +162,23 @@ namespace SDLTetris
                 SDL_mixer.Mix_FreeChunk(sound);
                 sound = IntPtr.Zero;
             }
+
+            //-- 
+            if (File.Exists(SANSATION_TTF))
+            {
+                File.Delete(SANSATION_TTF);                
+            }
+
+            if (File.Exists(SUCCES_WAV))
+            {
+                File.Delete(SUCCES_WAV);                
+            }
+
+            if (File.Exists(TETRIS_WAV))
+            {
+                File.Delete(TETRIS_WAV);                
+            }
+
             Console.WriteLine(">>>FreeResources<<<<");
 
         }
@@ -491,7 +513,6 @@ namespace SDLTetris
             }
 
         }
-
 
         public void DrawScore(IntPtr renderer, IntPtr tt_font)
         {
