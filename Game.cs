@@ -25,7 +25,6 @@ namespace SDLTetris
     class Game : System.IDisposable
     {
         const string TITLE = "C# SDL2 Tetris";
-
         const string SANSATION_TTF = "sansation.ttf";
         const string TETRIS_WAV = "Tetris.wav";
         const string SUCCES_WAV = "109662__grunz__success.wav";
@@ -371,7 +370,7 @@ namespace SDLTetris
         public Int32 TetrisRandomizer()
         {
             Int32 iSrc;
-            Int32 iTyp = 0;
+            Int32 iTyp;
             if (idTetrominoBag < 14)
             {
                 iTyp = tetrominoBag[idTetrominoBag];
@@ -380,7 +379,7 @@ namespace SDLTetris
             else
             {
                 //-- Shuttle bag
-                if (Globals.rand != null)
+                if (Globals.rand is not null)
                 {
                     for (int i = 0; i < tetrominoBag.Length; i++)
                     {
@@ -415,21 +414,15 @@ namespace SDLTetris
 
         public Int32 ComputeScore(Int32 nbLines)
         {
-            switch (nbLines)
+            return nbLines switch
             {
-                case 0:
-                    return 0;
-                case 1:
-                    return 40;
-                case 2:
-                    return 100;
-                case 3:
-                    return 300;
-                case 4:
-                    return 1200;
-                default:
-                    return 2000;
-            }
+                0 => 0,
+                1 => 40,
+                2 => 100,
+                3 => 300,
+                4 => 1200,
+                _ => 2000,
+            };
         }
 
 
