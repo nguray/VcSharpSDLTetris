@@ -12,9 +12,10 @@ namespace SDLTetris
         delegate bool IsOutLimit_t();
         IsOutLimit_t? IsOutLimit;
 
-        ulong startTimeV = 0;
-        ulong startTimeH = 0;
-        ulong startTimeE = 0;
+        ulong   startTimeV = 0;
+        ulong   startTimeH = 0;
+        ulong   startTimeE = 0;
+        bool    fRotateTetromino = false;
 
         public PlayMode(Game g)
         {
@@ -49,45 +50,8 @@ namespace SDLTetris
                                 IsOutLimit = curTetro.IsOutRight;
                                 break;
                             case SDL.SDL_Keycode.SDLK_UP:
-                                curTetro.RotateLeft();
-                                if (curTetro.HitGround(g.board))
-                                {
-                                    //-- Undo Rotate
-                                    curTetro.RotateRight();
-                                }
-                                else if (curTetro.IsOutRight())
-                                {
-                                    var backupX = curTetro.x;
-                                    //-- Move Inside board
-                                    while (curTetro.IsOutRight())
-                                    {
-                                        curTetro.x--;
-                                    }
-                                    if (curTetro.HitGround(g.board))
-                                    {
-                                        curTetro.x = backupX;
-                                        //-- Undo Rotate
-                                        curTetro.RotateRight();
-
-                                    }
-                                }
-                                else if (curTetro.IsOutLeft())
-                                {
-                                    var backupX = curTetro.x;
-                                    //-- Move Inside Board
-                                    while (curTetro.IsOutLeft())
-                                    {
-                                        curTetro.x++;
-                                    }
-                                    if (curTetro.HitGround(g.board))
-                                    {
-                                        curTetro.x = backupX;
-                                        //-- Undo Rotate
-                                        curTetro.RotateRight();
-
-                                    }
-
-                                }
+                                //-- Request tetromino rotation
+                                fRotateTetromino = true;
                                 break;
                             case SDL.SDL_Keycode.SDLK_DOWN:
                                 g.fFastDown = true;
@@ -132,6 +96,7 @@ namespace SDLTetris
             startTimeH = 0;
             startTimeV = 0;
             startTimeE = 0;
+            fRotateTetromino = false;
         }
 
 
@@ -203,6 +168,50 @@ namespace SDLTetris
 
                 }
 
+            }else if (fRotateTetromino)
+            {
+                //-- Rotate when there no more horizontal move
+                curTetro.RotateLeft();
+                if (curTetro.HitGround(g.board))
+                {
+                    //-- Undo Rotate
+                    curTetro.RotateRight();
+                }
+                else if (curTetro.IsOutRight())
+                {
+                    var backupX = curTetro.x;
+                    //-- Move Inside board
+                    while (curTetro.IsOutRight())
+                    {
+                        curTetro.x--;
+                    }
+                    if (curTetro.HitGround(g.board))
+                    {
+                        curTetro.x = backupX;
+                        //-- Undo Rotate
+                        curTetro.RotateRight();
+
+                    }
+                }
+                else if (curTetro.IsOutLeft())
+                {
+                    var backupX = curTetro.x;
+                    //-- Move Inside Board
+                    while (curTetro.IsOutLeft())
+                    {
+                        curTetro.x++;
+                    }
+                    if (curTetro.HitGround(g.board))
+                    {
+                        curTetro.x = backupX;
+                        //-- Undo Rotate
+                        curTetro.RotateRight();
+
+                    }
+
+                }
+
+                fRotateTetromino = false;
             }
             else if (g.fDrop)
             {
